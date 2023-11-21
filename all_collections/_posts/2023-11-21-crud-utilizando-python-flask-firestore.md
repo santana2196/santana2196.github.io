@@ -5,8 +5,6 @@ date: 2023-11-21
 categories: ["Flask", "Python", "Firestore"]
 ---
 
-## Exemplo de crud utilizando o python, flask e firestore
-
 #### `Mãos a Obra`
 
 ![Dummy Image 1](https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966)
