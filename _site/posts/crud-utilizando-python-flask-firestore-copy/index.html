@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Santana2196 | Exemplo de crud utilizando o python, flask e firestore</title>
+  
+  <link rel="stylesheet" href="/assets/css/post.css" />
+  <link rel="stylesheet" href="/assets/css/syntax.css" />
+  
+  <link rel="stylesheet" href="/assets/css/common.css" />
+  <script src="/assets/js/categories.js"></script>
+  <script>
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme) {
+      document.documentElement.setAttribute(
+        "data-theme",
+        localStorage.getItem("theme")
+      );
+    }
+  </script>
+  
+  <script defer src="/assets/js/lbox.js"></script>
+  
+</head>
+
+  <body>
+    <main>
+      <header>
+  <a class="site-title" href="/">Santana2196</a>
+  <!-- dark/light mode -->
+  <span id="dark-mode-toggle" style="cursor: pointer">
+    <svg
+      stroke="currentColor"
+      fill="currentColor"
+      stroke-width="0"
+      viewBox="0 0 16 16"
+      height="1.2em"
+      width="1.2em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13V2a6 6 0 1 1 0 12z"
+      ></path>
+    </svg>
+  </span>
+</header>
+
+      <section class="article">
+        <div class="article-header">
+          <h2 class="article-title">Exemplo de crud utilizando o python, flask e firestore</h2>
+          <small class="date">21 Nov 2023</small>
+          <div class="categories">
+            
+            <a href="#!" class="category">Flask</a>
+            
+            <a href="#!" class="category">Python</a>
+            
+            <a href="#!" class="category">Firestore</a>
+            
+          </div>
+        </div>
+        <div class="content"><h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+
+<p><img src="https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966" alt="Dummy Image 1" /></p>
+
+<h6 id="clone-do-repositorio">Clone do repositorio:</h6>
+<p><code class="language-plaintext highlighter-rouge">git clone https://github.com/santana2196/flask_firestore_api.git</code></p>
+
+<h6 id="criar-o-ambiente-virtual">Criar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 -m venv venv</code></p>
+
+<h6 id="acessar-o-ambiente-virtual">Acessar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">source venv/bin/activate</code></p>
+
+<h6 id="instalar-dependências">Instalar dependências:</h6>
+<p><code class="language-plaintext highlighter-rouge">pip install -r req.txt</code></p>
+
+<h6 id="arquivo-de-configuracao">Arquivo de configuracao:</h6>
+<p><code class="language-plaintext highlighter-rouge">app/__init__.py</code></p>
+
+<h6 id="baixa-e-adicionar-o-arquivo-com-as-credencial-do-google-linha">Baixa e adicionar o arquivo com as credencial do google, linha:</h6>
+<p><code class="language-plaintext highlighter-rouge">cred = credentials.Certificate('./firebase-admin.json')</code></p>
+
+<h6 id="executar-projeto-na-porta-8080">Executar projeto na porta 8080:</h6>
+<p><code class="language-plaintext highlighter-rouge">python run.py</code></p>
+
+<h5 id="segue-payloads-as-collection-a-ser-criada-ja-definida-no-appinitpy-chamada-users">Segue payloads, as collection a ser criada ja definida no app/<strong>init</strong>.py chamada users</h5>
+
+<h6 id="adicionar">Adicionar:</h6>
+<blockquote>
+  <p>curl –location –request POST ‘localhost:8080/add’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “nome”: “fabricio”, “idade”: 35, “cidade”: “BA”, “linguagens”: [“Java script”,”Java”] }’</p>
+</blockquote>
+
+<h6 id="listar">Listar:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list’</p>
+</blockquote>
+
+<h6 id="listar-passando-argumento">Listar passando argumento:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list?nome=fabricio’ –data-raw ‘’</p>
+</blockquote>
+
+<h6 id="atualizar">Atualizar:</h6>
+<blockquote>
+  <p>curl –location –request PUT ‘localhost:8080/update’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “id”: “fD6BFOBmVsIbUjY7OUFq” , “nome”: “ronaldo”, “idade”: 32, “cidade”: “SP”, “linguagens”: [“python”] }’</p>
+</blockquote>
+
+<h6 id="delete-com-argumento-id">Delete com argumento id:</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=60LnTY0jSTmibWSc3b5S’ \ –data-raw ‘’</p>
+</blockquote>
+
+<h6 id="deletar-todo">Deletar todo</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=all’ \ –data-raw ‘’</p>
+</blockquote>
+
+<h5 id="pontos-a-melhorar">Pontos a melhorar</h5>
+<ol>
+  <li>msg de erro</li>
+  <li>filtro</li>
+  <li>output de logs</li>
+  <li>uso de OOP</li>
+  <li>adicionar wsgi</li>
+</ol>
+</div>
+      </section>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6455673049503523"
+     crossorigin="anonymous"></script>
+<!-- bloco -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6455673049503523"
+     data-ad-slot="9979445725"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<footer>
+  <p>&copy; 2023 - 2023 | Santana2196</p>
+</footer>
+<script src="/assets/js/mode.js" defer></script>
+
+    </main>
+    <section id="category-modal-bg"></section>
+<section id="category-modal">
+  <h1 id="category-modal-title"></h1>
+  <section id="category-modal-content"></section>
+</section>
+
+  </body>
+</html>

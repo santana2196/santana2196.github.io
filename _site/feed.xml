@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-11-23T00:21:29-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/crud-utilizando-python-flask-firestore%20copy</id><content type="html" xml:base="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/"><![CDATA[#### `Mãos a Obra`
+
+![Dummy Image 1](https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966)
+
+###### Clone do repositorio:
+`git clone https://github.com/santana2196/flask_firestore_api.git`
+
+###### Criar o ambiente virtual:
+`python3 -m venv venv`
+
+###### Acessar o ambiente virtual:
+`source venv/bin/activate`
+
+###### Instalar dependências:
+`pip install -r req.txt`
+
+###### Arquivo de configuracao:
+`app/__init__.py`
+
+###### Baixa e adicionar o arquivo com as credencial do google, linha:
+`cred = credentials.Certificate('./firebase-admin.json')`
+
+###### Executar projeto na porta 8080:
+`python run.py`
+
+##### Segue payloads, as collection a ser criada ja definida no app/__init__.py chamada users
+
+###### Adicionar:
+> curl --location --request POST 'localhost:8080/add' \ --header 'Content-Type: application/json' \ --data-raw '{ "nome": "fabricio", "idade": 35, "cidade": "BA", "linguagens": ["Java script","Java"] }'
+
+###### Listar:
+> curl --location --request GET 'localhost:8080/list'
+
+###### Listar passando argumento:
+> curl --location --request GET 'localhost:8080/list?nome=fabricio' --data-raw ''
+
+###### Atualizar:
+> curl --location --request PUT 'localhost:8080/update' \ --header 'Content-Type: application/json' \ --data-raw '{ "id": "fD6BFOBmVsIbUjY7OUFq" , "nome": "ronaldo", "idade": 32, "cidade": "SP", "linguagens": ["python"] }'
+
+###### Delete com argumento id:
+> curl --location --request DELETE 'localhost:8080/delete?id=60LnTY0jSTmibWSc3b5S' \ --data-raw ''
+
+###### Deletar todo
+> curl --location --request DELETE 'localhost:8080/delete?id=all' \ --data-raw ''
+
+##### Pontos a melhorar
+1. msg de erro 
+1. filtro 
+1. output de logs 
+1. uso de OOP 
+1. adicionar wsgi]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Flask" /><category term="Python" /><category term="Firestore" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry><entry><title type="html">Exemplo de publish e consumer utilizando rabbitmq</title><link href="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/" rel="alternate" type="text/html" title="Exemplo de publish e consumer utilizando rabbitmq" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer</id><content type="html" xml:base="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+
+<p><img src="https://camo.githubusercontent.com/4191faa8c3f466fc5352fba86bacb48d3d9050cfa1c29f56dbfa003c11c4121a/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6c394a687a77646930395665302f67697068792e676966" alt="Dummy Image 1" /></p>
+
+<h6 id="clone-do-repositorio">Clone do repositorio:</h6>
+<blockquote>
+  <p>git clone https://github.com/santana2196/rabbitmq_publish_consumer.git</p>
+</blockquote>
+
+<h6 id="criar-o-ambiente-virtual">Criar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 -m venv venv</code></p>
+
+<h6 id="acessar-o-ambiente-virtual">Acessar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">source venv/bin/activate</code></p>
+
+<h6 id="instalar-dependências">Instalar dependências:</h6>
+<p><code class="language-plaintext highlighter-rouge">pip3 install pika</code></p>
+
+<h6 id="docker-compose">docker-compose:</h6>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: '3.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+        - app
+    volumes:
+        - ./rabbitmq/data/:/var/lib/rabbitmq/
+        - ./rabbitmq/log/:/var/log/rabbitmq/
+
+networks:
+  app:
+    driver: bridge
+</code></pre></div></div>
+
+<h6 id="subir-o-ambiente-utilizando-docker-compose">subir o ambiente utilizando docker-compose:</h6>
+<p><code class="language-plaintext highlighter-rouge">docker-compose up -d</code></p>
+
+<h6 id="acessar-rabbitmq">Acessar rabbitmq:</h6>
+<p><code class="language-plaintext highlighter-rouge">localhost:15672</code></p>
+
+<h5 id="login">Login:</h5>
+<p><code class="language-plaintext highlighter-rouge">login: guest</code>
+<code class="language-plaintext highlighter-rouge">pass: guest</code></p>
+
+<h6 id="exemplo-de-publicação">Exemplo de publicação:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 publish_rabbitmq.py</code></p>
+
+<h6 id="exemplo-de-consumer">Exemplo de consumer:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 consumer-rabbitmq.py</code></p>
+
+<h6 id="validando-a-insersao-no-banco-sqlite3">Validando a insersao no banco sqlite3:</h6>
+<p><code class="language-plaintext highlighter-rouge">sqlite3 operation/banco/db.sqlite3</code>
+<code class="language-plaintext highlighter-rouge">sqlite&gt; select count(*) from population;</code></p>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="rabbitmq" /><category term="Python" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry></feed>
