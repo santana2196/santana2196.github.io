@@ -1,54 +1,68 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-11-23T00:21:29-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/crud-utilizando-python-flask-firestore%20copy</id><content type="html" xml:base="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/"><![CDATA[#### `Mãos a Obra`
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-12-12T20:38:06-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/crud-utilizando-python-flask-firestore%20copy</id><content type="html" xml:base="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
 
-![Dummy Image 1](https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966)
+<p><img src="https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966" alt="Dummy Image 1" /></p>
 
-###### Clone do repositorio:
-`git clone https://github.com/santana2196/flask_firestore_api.git`
+<h6 id="clone-do-repositorio">Clone do repositorio:</h6>
+<p><code class="language-plaintext highlighter-rouge">git clone https://github.com/santana2196/flask_firestore_api.git</code></p>
 
-###### Criar o ambiente virtual:
-`python3 -m venv venv`
+<h6 id="criar-o-ambiente-virtual">Criar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 -m venv venv</code></p>
 
-###### Acessar o ambiente virtual:
-`source venv/bin/activate`
+<h6 id="acessar-o-ambiente-virtual">Acessar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">source venv/bin/activate</code></p>
 
-###### Instalar dependências:
-`pip install -r req.txt`
+<h6 id="instalar-dependências">Instalar dependências:</h6>
+<p><code class="language-plaintext highlighter-rouge">pip install -r req.txt</code></p>
 
-###### Arquivo de configuracao:
-`app/__init__.py`
+<h6 id="arquivo-de-configuracao">Arquivo de configuracao:</h6>
+<p><code class="language-plaintext highlighter-rouge">app/__init__.py</code></p>
 
-###### Baixa e adicionar o arquivo com as credencial do google, linha:
-`cred = credentials.Certificate('./firebase-admin.json')`
+<h6 id="baixa-e-adicionar-o-arquivo-com-as-credencial-do-google-linha">Baixa e adicionar o arquivo com as credencial do google, linha:</h6>
+<p><code class="language-plaintext highlighter-rouge">cred = credentials.Certificate('./firebase-admin.json')</code></p>
 
-###### Executar projeto na porta 8080:
-`python run.py`
+<h6 id="executar-projeto-na-porta-8080">Executar projeto na porta 8080:</h6>
+<p><code class="language-plaintext highlighter-rouge">python run.py</code></p>
 
-##### Segue payloads, as collection a ser criada ja definida no app/__init__.py chamada users
+<h5 id="segue-payloads-as-collection-a-ser-criada-ja-definida-no-appinitpy-chamada-users">Segue payloads, as collection a ser criada ja definida no app/<strong>init</strong>.py chamada users</h5>
 
-###### Adicionar:
-> curl --location --request POST 'localhost:8080/add' \ --header 'Content-Type: application/json' \ --data-raw '{ "nome": "fabricio", "idade": 35, "cidade": "BA", "linguagens": ["Java script","Java"] }'
+<h6 id="adicionar">Adicionar:</h6>
+<blockquote>
+  <p>curl –location –request POST ‘localhost:8080/add’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “nome”: “fabricio”, “idade”: 35, “cidade”: “BA”, “linguagens”: [“Java script”,”Java”] }’</p>
+</blockquote>
 
-###### Listar:
-> curl --location --request GET 'localhost:8080/list'
+<h6 id="listar">Listar:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list’</p>
+</blockquote>
 
-###### Listar passando argumento:
-> curl --location --request GET 'localhost:8080/list?nome=fabricio' --data-raw ''
+<h6 id="listar-passando-argumento">Listar passando argumento:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list?nome=fabricio’ –data-raw ‘’</p>
+</blockquote>
 
-###### Atualizar:
-> curl --location --request PUT 'localhost:8080/update' \ --header 'Content-Type: application/json' \ --data-raw '{ "id": "fD6BFOBmVsIbUjY7OUFq" , "nome": "ronaldo", "idade": 32, "cidade": "SP", "linguagens": ["python"] }'
+<h6 id="atualizar">Atualizar:</h6>
+<blockquote>
+  <p>curl –location –request PUT ‘localhost:8080/update’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “id”: “fD6BFOBmVsIbUjY7OUFq” , “nome”: “ronaldo”, “idade”: 32, “cidade”: “SP”, “linguagens”: [“python”] }’</p>
+</blockquote>
 
-###### Delete com argumento id:
-> curl --location --request DELETE 'localhost:8080/delete?id=60LnTY0jSTmibWSc3b5S' \ --data-raw ''
+<h6 id="delete-com-argumento-id">Delete com argumento id:</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=60LnTY0jSTmibWSc3b5S’ \ –data-raw ‘’</p>
+</blockquote>
 
-###### Deletar todo
-> curl --location --request DELETE 'localhost:8080/delete?id=all' \ --data-raw ''
+<h6 id="deletar-todo">Deletar todo</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=all’ \ –data-raw ‘’</p>
+</blockquote>
 
-##### Pontos a melhorar
-1. msg de erro 
-1. filtro 
-1. output de logs 
-1. uso de OOP 
-1. adicionar wsgi]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Flask" /><category term="Python" /><category term="Firestore" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry><entry><title type="html">Exemplo de publish e consumer utilizando rabbitmq</title><link href="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/" rel="alternate" type="text/html" title="Exemplo de publish e consumer utilizando rabbitmq" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer</id><content type="html" xml:base="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+<h5 id="pontos-a-melhorar">Pontos a melhorar</h5>
+<ol>
+  <li>msg de erro</li>
+  <li>filtro</li>
+  <li>output de logs</li>
+  <li>uso de OOP</li>
+  <li>adicionar wsgi</li>
+</ol>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Flask" /><category term="Python" /><category term="Firestore" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry><entry><title type="html">Exemplo de publish e consumer utilizando rabbitmq</title><link href="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/" rel="alternate" type="text/html" title="Exemplo de publish e consumer utilizando rabbitmq" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer</id><content type="html" xml:base="http://localhost:4000/posts/exemplo-rabbitmq-publish-consumer/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
 
 <p><img src="https://camo.githubusercontent.com/4191faa8c3f466fc5352fba86bacb48d3d9050cfa1c29f56dbfa003c11c4121a/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6c394a687a77646930395665302f67697068792e676966" alt="Dummy Image 1" /></p>
 
