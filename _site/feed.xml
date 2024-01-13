@@ -1,4 +1,91 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-12-16T08:03:26-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/crud-utilizando-python-flask-firestore%20copy</id><content type="html" xml:base="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-01-13T17:47:54-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Exemplo de utilizar alexa e executar comando de voz para ser executado no linux</title><link href="http://localhost:4000/posts/configurando-alexa-triggercmd/" rel="alternate" type="text/html" title="Exemplo de utilizar alexa e executar comando de voz para ser executado no linux" /><published>2024-01-08T00:00:00-03:00</published><updated>2024-01-08T00:00:00-03:00</updated><id>http://localhost:4000/posts/configurando-alexa-triggercmd</id><content type="html" xml:base="http://localhost:4000/posts/configurando-alexa-triggercmd/"><![CDATA[<h6 id="recentemente-adquirir-uma-alexa-da-5-geracao-assim-podendo-fazer-alguma-coisa-com-meu-raspberry-que-estava-parado-a-um-tempo">Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo.</h6>
+<h6 id="vamos-esta-configurando-configurando-a-alexa-e-o-triggercmd-para-conseguimos-executar-comando-de-voz-ao-raspberry">Vamos esta configurando configurando a Alexa e o TriggerCmd para conseguimos executar comando de voz ao raspberry.</h6>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/cat-da.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="cria-uma-conta-triggercmd">Cria uma conta, TriggerCmd:</h6>
+<p>https://www.triggercmd.com/user/auth/login</p>
+
+<h6 id="onde-localizar-o-token">Onde localizar o token:</h6>
+
+<p>https://www.triggercmd.com/user/computer/create</p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa8.png" alt="Image8" /></p>
+
+<h4 id="vamos-comeca-a-configurar-onde-sera-executado-o-triggercmd">Vamos comeca a configurar onde sera executado o triggerCmd</h4>
+
+<h6 id="segue-linhas-para-instalar-executar-como-root-porque-precisa-de-permissoes">Segue linhas para instalar, executar como root porque precisa de permissoes:</h6>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>su -
+apt-get <span class="nt">-y</span> update
+apt-get <span class="nt">-y</span> upgrade
+apt <span class="nt">-y</span> <span class="nb">install </span>npm nodejs
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://agents.triggercmd.com/triggercmdagent_1.0.1_all.deb
+dpkg <span class="nt">-i</span> triggercmdagent_1.0.1_all.deb
+</code></pre></div></div>
+
+<h6 id="executar-o-comando-para-configurar-o-token">Executar o comando para configurar o token:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">triggercmdagent</span>
+</code></pre></div></div>
+<blockquote>
+  <p>( colar o token, e pressionar o ENTER e aguardar)
+( ao finalizar, precione CTRL-C para sair. )</p>
+</blockquote>
+
+<h6 id="instalar-e-configurar-o-daemon-dos-servicos">instalar e configurar o Daemon dos servicos:</h6>
+<p>bash /usr/share/triggercmdagent/app/src/installdaemon.sh</p>
+
+<h6 id="lista-de-comando-para-executar-como-servico">Lista de comando para executar como servico:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl stop triggercmdagent
+systemctl start triggercmdagent
+systemctl status triggercmdagent
+</code></pre></div></div>
+<h6 id="arquivo-onde-e-amarzenado-os-comandos-e-ja-com-uns-exemplos">Arquivo onde e amarzenado os comandos, e ja com uns exemplos:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/root/.TRIGGERcmdData/commands.json
+
+root@raspberrypi:~# <span class="nb">cat</span> /root/.TRIGGERcmdData/commands.json
+<span class="o">[</span>
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"Reboot"</span>,<span class="s2">"command"</span>:<span class="s2">"shutdown -r"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"reboot"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"yum update"</span>,<span class="s2">"command"</span>:<span class="s2">"yum -y update"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"yum update"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"apt update"</span>,<span class="s2">"command"</span>:<span class="s2">"apt-get -y update"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"update"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"desligar"</span>,<span class="s2">"command"</span>:<span class="s2">"shutdown now"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"desligar pi"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div></div>
+
+<h6 id="agora-vamos-configura-no-app-da-alexa">Agora vamos configura no app da alexa:</h6>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa1.png" alt="Dummy Image 1" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa2.png" alt="Dummy Image 2" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa3.png" alt="Dummy Image 3" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa4.png" alt="Dummy Image 4" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa5.png" alt="Dummy Image 5" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa6.png" alt="Dummy Image 6" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa7.png" alt="Dummy Image 7" /></p>
+
+<p>Para executar basta dizer: <strong>Alexa, desligar pi</strong>.</p>
+
+<h4 id="obs">Obs.</h4>
+
+<blockquote>
+  <p>para adicionar comandos, precisa seguir exemplo acima e sempre da um restart no servico que a alexa ja auto reconhece comando novo</p>
+</blockquote>
+
+<h6 id="para-remover">Para remover:</h6>
+<p><code class="language-plaintext highlighter-rouge">desabilitar a skill que foi habilitada</code></p>
+
+<h6 id="remover-os-servicos">Remover os servicos</h6>
+<p><code class="language-plaintext highlighter-rouge">systemctl stop triggercmdagent</code>
+<code class="language-plaintext highlighter-rouge">bash /usr/share/triggercmdagent/app/src/removedaemon.sh</code>
+<code class="language-plaintext highlighter-rouge">apt remove triggercmdagent</code></p>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Alexa" /><category term="TriggerCMD" /><summary type="html"><![CDATA[Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo. Vamos esta configurando configurando a Alexa e o TriggerCmd para conseguimos executar comando de voz ao raspberry.]]></summary></entry><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>http://localhost:4000/posts/crud-utilizando-python-flask-firestore%20copy</id><content type="html" xml:base="http://localhost:4000/posts/crud-utilizando-python-flask-firestore-copy/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
 
 <p><img src="https://camo.githubusercontent.com/9b4edd2d7fb9935c8bfd615e42f6be8ce444bf0248b4e72929ab73550626cf73/68747470733a2f2f6d65646961322e67697068792e636f6d2f6d656469612f6f3238656c544c784f6a6952572f67697068792e676966" alt="Dummy Image 1" /></p>
 
