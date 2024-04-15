@@ -7,7 +7,7 @@ categories: ["rabbitmq", "Python", "docker"]
 
 #### `Mãos a Obra`
 
-![Dummy Image 1](https://camo.githubusercontent.com/4191faa8c3f466fc5352fba86bacb48d3d9050cfa1c29f56dbfa003c11c4121a/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6c394a687a77646930395665302f67697068792e676966)
+![Dummy Image 8]({{site.baseurl}}/assets/icons/imgs/work1.gif)
 
 ###### Clone do repositorio:
 > git clone https://github.com/santana2196/rabbitmq_publish_consumer.git

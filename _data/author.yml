@@ -11,11 +11,11 @@ description: "
    <a href='https://github.com/santana2196' target='_blank'>Github</a>
   </P>
 "
-email: santana2196@outlook.com
+# email: email@email
 contact:
   # - title: linkedin
   #   url: https://www.linkedin.com/in/
   - title: github
     url: https://github.com/santana2196
-  - title: email
-    url: mailto:santana2196@outlook.com
+  # - title: email
+  #   url: email@email.com
