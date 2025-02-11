@@ -151,7 +151,19 @@
      (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
 <footer>
-  <p>&copy; 2023 - 2024 | Santana2196</p>
+  <p>&copy; 2022 - 2025 | Santana2196</p>
+  <script>
+
+        // requisicoes web 
+        fetch("https://servicodados.ibge.gov.br/api/v3/noticias/?busca=fii")
+        // .then - para sucesso
+        // .catch - para erro
+        .then(response => {
+            response.json().then(data => console.log(data));
+        })
+        .catch(error => console.log("error: ", error))
+
+  </script>
 </footer>
 <script src="/assets/js/mode.js" defer></script>
 
