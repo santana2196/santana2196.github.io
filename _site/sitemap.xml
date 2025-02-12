@@ -13,6 +13,11 @@
   <priority>1.00</priority>
 </url>
 <url>
+  <loc>santana2196</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
   <loc>https://santana2196.github.io/posts/kuberntes-taint-no-master/</loc>
   <lastmod>2024-04-18T21:41:03+00:00</lastmod>
   <priority>0.80</priority>
@@ -42,6 +47,5 @@
   <lastmod>2024-04-18T21:41:03+00:00</lastmod>
   <priority>0.80</priority>
 </url>
-
 
 </urlset>
