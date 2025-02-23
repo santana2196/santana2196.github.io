@@ -2,7 +2,7 @@
 layout: post
 title: Exemplo de publish e consumer utilizando rabbitmq e python
 date: 2023-11-21
-categories: ["rabbitmq", "Python", "docker"]
+categories: ["Rabbitmq", "Python", "Docker"]
 ---
 
 #### `Mãos a Obra`

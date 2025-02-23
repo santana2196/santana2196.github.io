@@ -4,7 +4,7 @@ markdown: kramdown
 # for atom feed
 author:
   name: Santana2196
-  email: santana2196@outlook.com
+  email: santana2196
 
 plugins:
   - jemoji

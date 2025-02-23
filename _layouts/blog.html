@@ -3,9 +3,17 @@
   {% include head.html %}
   <body>
     <main>
-      {% include header.html %} {% include bio.html %}
+      {% include header.html %} {% include bio.html %}          
       <section class="articles">
-        {% for post in site.posts %}
+        <article class="article">
+          <h1>Tags</h1><br>
+        <div class="categories" id="newinner"> 
+          <script src="../assets/js/format.js"></script>
+      </div>
+        </article>
+      </section>
+      <section class="articles">
+        {% for post in site.posts %}       
         <article class="article">
           <h2 class="article-title">
             <a href="{{site.baseurl}}{{post.url}}"> {{post.title}} </a>
@@ -13,9 +21,7 @@
           <small class="date">{{post.date | date_to_string}}</small>
           <div class="categories">
             {% for c in post.categories %}
-            <a href="#!" data-base-url="{{site.baseurl}}" class="category"
-              >{{c}}</a
-            >
+            <a href="#!" data-base-url="{{site.baseurl}}" class="category">{{c}}</a>
             {% endfor %}
           </div>
         </article>

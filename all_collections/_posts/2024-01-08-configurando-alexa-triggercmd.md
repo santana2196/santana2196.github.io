@@ -2,7 +2,7 @@
 layout: post
 title: Exemplo de utilizar alexa e executar comando de voz para ser executado no linux
 date: 2024-01-08
-categories: ["Alexa", "TriggerCMD"]
+categories: ["Alexa", "TriggerCMD", "Raspberry"]
 ---
 
 ###### Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo.

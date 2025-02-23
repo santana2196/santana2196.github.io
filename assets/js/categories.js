@@ -3,8 +3,9 @@
 
 const categories = { {% for category in site.categories %}{% capture category_name %}{{ category | first }}{% endcapture %}{{ category_name | replace: " ", "_" }}: [{% for post in site.categories[category_name] %}{ url: `{{ site.baseurl }}{{ post.url }}`, date: `{{post.date | date_to_string}}`, title: `{{post.title}}`},{% endfor %}],{% endfor %} }
 
-console.log(categories)
-console.log("teste")
+
+// console.log(categories)
+// console.log("teste")
 
 window.onload = function () {
   document.querySelectorAll(".category").forEach((category) => {
@@ -14,10 +15,11 @@ window.onload = function () {
       posts.forEach(post=>{
         html += `
         <a class="modal-article" href="${post.url}">
-          <h4>${post.title}</h4>
+          <h1>${post.title}</h1>
           <small class="modal-article-date">${post.date}</small>
         </a>
         `
+        // console.log(post)
       })
       document.querySelector("#category-modal-title").innerText = e.target.innerText;
       document.querySelector("#category-modal-content").innerHTML = html;
