@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://santana2196.github.io/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>santana2196</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/kuberntes-taint-no-master/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/kubenets-ip-local-com-metallb/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/configurando-alexa-triggercmd/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/exemplo-rabbitmq-publish-consumer/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://santana2196.github.io/posts/crud-utilizando-python-flask-firestore/</loc>
+  <lastmod>2024-04-18T21:41:03+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+
+</urlset>

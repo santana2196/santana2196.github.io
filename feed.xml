@@ -1,0 +1,1129 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://santana2196.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://santana2196.github.io/" rel="alternate" type="text/html" /><updated>2025-02-10T22:02:01-03:00</updated><id>https://santana2196.github.io/feed.xml</id><title type="html">Santana2196</title><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><entry><title type="html">Como permitir que o Nó master deixe agendar os pods</title><link href="https://santana2196.github.io/posts/kuberntes-taint-no-master/" rel="alternate" type="text/html" title="Como permitir que o Nó master deixe agendar os pods" /><published>2024-04-18T00:00:00-03:00</published><updated>2024-04-18T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/kuberntes-taint-no-master</id><content type="html" xml:base="https://santana2196.github.io/posts/kuberntes-taint-no-master/"><![CDATA[<h5 id="nesse-post-curto-vamos-permitir-que-o-no-master-agende-pod">Nesse post curto vamos permitir que o No master agende pod</h5>
+
+<h6 id="por-default-o-no-master-nao-agendar-pod-deixa-essa-responsabilidade-para-os-nos-escravos-com-isso-vamos-configurar-para-que-ele-deixe-agendar-no-nó-master-tambem">Por default o No master nao agendar pod, deixa essa responsabilidade para os nos escravos, com isso vamos configurar para que ele deixe agendar no Nó master tambem.</h6>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/angry-cat.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="vamos-seguir-nosso-lab-e-vamos-provisionar-apenas-o-master-no-lab-que-montamos">Vamos seguir nosso lab e vamos provisionar apenas o master no lab que montamos:</h6>
+<ul>
+  <li>lab ja esta criado -&gt; <a href="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/">Lab Kubernets</a>.</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">nodes</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>   <span class="nx">ROLES</span>           <span class="nx">AGE</span>    <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>    <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">5</span><span class="nx">d8h</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">Ready</span>    <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">5</span><span class="nx">d8h</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+</code></pre></div></div>
+<h6 id="vamos-parar-a-vm-de-no-vamos-perceber-que-as-aplicação-vao-parar-de-responder-porque-nao-tem-onde-agendar-fica-mais-nitido-quando-deleta-os-pods">Vamos parar a vm de No, vamos perceber que as aplicação vao parar de responder porque nao tem onde agendar, fica mais nitido quando deleta os pods:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ vagrant halt node</span><span class="err">1
+</span><span class="o">==&gt;</span> <span class="nx">node1</span><span class="p">:</span> <span class="nx">Attempting</span> <span class="nx">graceful</span> <span class="nx">shutdown</span> <span class="k">of</span> <span class="nx">VM</span><span class="p">...</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ vagrant statu</span><span class="err">s
+</span><span class="nx">Current</span> <span class="nx">machine</span> <span class="nx">states</span><span class="p">:</span>
+
+<span class="nx">master</span>                    <span class="nf">running </span><span class="p">(</span><span class="nx">virtualbox</span><span class="p">)</span>
+<span class="nx">node1</span>                     <span class="nf">poweroff </span><span class="p">(</span><span class="nx">virtualbox</span><span class="p">)</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">10</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//192.168.0.100/</span>
+<span class="nx">curl</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="nx">Failed</span> <span class="nx">to</span> <span class="nx">connect</span> <span class="nx">to</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> <span class="nx">port</span> <span class="mi">80</span> <span class="nx">after</span> <span class="mi">3055</span> <span class="nx">ms</span><span class="p">:</span> <span class="nx">No</span> <span class="nx">route</span> <span class="nx">to</span> <span class="nx">host</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="k">delete</span> <span class="nx">pods</span> <span class="o">--</span><span class="nx">all</span> <span class="o">--</span><span class="nx">force</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">mysql-openshift</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-8nq84</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-cg475</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-ddnpp</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-dmb8s</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-gx844</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-hbj5z</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-mtl5m</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-r4xm6</span><span class="dl">"</span> <span class="nx">deleted</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">nwqrw</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">t4rv8</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">wcgjw</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+
+</code></pre></div></div>
+<h6 id="vamos-utilizar-o-comando-taint-para-configurar-o-agendamento-de-pods-no-nó-master">Vamos utilizar o comando taint para configurar o agendamento de pods no nó master:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">taint</span> <span class="nx">nodes</span> <span class="nx">master</span> <span class="nx">node</span><span class="o">-</span><span class="nx">role</span><span class="p">.</span><span class="nx">kubernetes</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="o">-</span>
+<span class="nx">node</span><span class="o">/</span><span class="nx">master</span> <span class="nx">untainted</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">nwqrw</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">t4rv8</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">wcgjw</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>
+
+</code></pre></div></div>
+<h1>!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+<h1 id="-fim-">!!!!!!!!!! FIM !!!!!!!!!!!</h1>
+<h1 id="-1">!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Kubernets" /><summary type="html"><![CDATA[Nesse post curto vamos permitir que o No master agende pod]]></summary></entry><entry><title type="html">Como expor app do kubernets utilizando ip local com “Metallb”</title><link href="https://santana2196.github.io/posts/kubenets-ip-local-com-metallb/" rel="alternate" type="text/html" title="Como expor app do kubernets utilizando ip local com “Metallb”" /><published>2024-04-17T00:00:00-03:00</published><updated>2024-04-17T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/kubenets-ip-local-com-metallb</id><content type="html" xml:base="https://santana2196.github.io/posts/kubenets-ip-local-com-metallb/"><![CDATA[<h5 id="nesse-post-vamos-expor-app-utilizando-ip-local-utilizando-metallb-no-kubernets">Nesse post vamos expor app utilizando ip local utilizando <code class="language-plaintext highlighter-rouge">Metallb</code> no Kubernets</h5>
+
+<h6 id="segue-pre-requisitos">Segue pre-requisitos:</h6>
+<ul>
+  <li>lab ja esta criado -&gt; <a href="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/">Lab Kubernets</a>.</li>
+</ul>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/cat.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="vamos-partir-do-principio-que-o-lab-ja-esta-funcionando-e-que-ja-esteja-rodando-o-nginx">Vamos partir do principio que o lab ja esta funcionando e que ja esteja rodando o nginx:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">n</span> <span class="nx">nginx</span>
+<span class="nx">NAME</span>                     <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">nginx</span><span class="o">-</span><span class="mi">7</span><span class="nx">c5ddbdf54</span><span class="o">-</span><span class="mi">2</span><span class="nx">wdjn</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">6</span><span class="nx">s</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span> <span class="o">-</span><span class="nx">n</span> <span class="nx">nginx</span>
+<span class="nx">NAME</span>    <span class="nx">TYPE</span>       <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>   <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">nginx</span>   <span class="nx">NodePort</span>   <span class="mf">10.102</span><span class="p">.</span><span class="mf">253.207</span>   <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="p">:</span><span class="mi">30000</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">4</span><span class="nx">d11h</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.20</span><span class="p">:</span><span class="mi">30000</span>
+<span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">nginx</span><span class="o">!&lt;</span><span class="sr">/title</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">style</span><span class="o">&gt;</span>
+<span class="nx">html</span> <span class="p">{</span> <span class="nx">color</span><span class="o">-</span><span class="nx">scheme</span><span class="p">:</span> <span class="nx">light</span> <span class="nx">dark</span><span class="p">;</span> <span class="p">}</span>
+<span class="nx">body</span> <span class="p">{</span> <span class="nl">width</span><span class="p">:</span> <span class="mi">35</span><span class="nx">em</span><span class="p">;</span> <span class="nl">margin</span><span class="p">:</span> <span class="mi">0</span> <span class="nx">auto</span><span class="p">;</span>
+<span class="nx">font</span><span class="o">-</span><span class="nx">family</span><span class="p">:</span> <span class="nx">Tahoma</span><span class="p">,</span> <span class="nx">Verdana</span><span class="p">,</span> <span class="nx">Arial</span><span class="p">,</span> <span class="nx">sans</span><span class="o">-</span><span class="nx">serif</span><span class="p">;</span> <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/style</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/head</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">nginx</span><span class="o">!&lt;</span><span class="sr">/h1</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">If</span> <span class="nx">you</span> <span class="nx">see</span> <span class="k">this</span> <span class="nx">page</span><span class="p">,</span> <span class="nx">the</span> <span class="nx">nginx</span> <span class="nx">web</span> <span class="nx">server</span> <span class="nx">is</span> <span class="nx">successfully</span> <span class="nx">installed</span> <span class="nx">and</span>
+<span class="nx">working</span><span class="p">.</span> <span class="nx">Further</span> <span class="nx">configuration</span> <span class="nx">is</span> <span class="nx">required</span><span class="p">.</span><span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">For</span> <span class="nx">online</span> <span class="nx">documentation</span> <span class="nx">and</span> <span class="nx">support</span> <span class="nx">please</span> <span class="nx">refer</span> <span class="nx">to</span>
+<span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://nginx.org/</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">org</span><span class="o">&lt;</span><span class="sr">/a&gt;.&lt;br/</span><span class="o">&gt;</span>
+<span class="nx">Commercial</span> <span class="nx">support</span> <span class="nx">is</span> <span class="nx">available</span> <span class="nx">at</span>
+<span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://nginx.com/</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">com</span><span class="o">&lt;</span><span class="sr">/a&gt;.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="nx">em</span><span class="o">&gt;</span><span class="nx">Thank</span> <span class="nx">you</span> <span class="k">for</span> <span class="nx">using</span> <span class="nx">nginx</span><span class="p">.</span><span class="o">&lt;</span><span class="sr">/em&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/html</span><span class="err">&gt;
+</span></code></pre></div></div>
+<h6 id="vamos-criar-um-deployment-a-partir-de-uma-imagem-do-dockerhub">Vamos criar um deployment a partir de uma imagem do dockerhub:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">deploy</span>
+<span class="nx">No</span> <span class="nx">resources</span> <span class="nx">found</span> <span class="k">in</span> <span class="k">default</span> <span class="nx">namespace</span><span class="p">.</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span>  <span class="nx">create</span> <span class="nx">deployment</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">image</span><span class="o">=</span><span class="nx">santana2196</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">google</span><span class="o">-</span><span class="nx">sample</span><span class="p">:</span><span class="mf">1.0</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">created</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">51</span><span class="nx">s</span>
+</code></pre></div></div>
+<h6 id="agora-vamos-expor-o-app">Agora vamos expor o app:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">deployment</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">type</span> <span class="nx">LoadBalancer</span> <span class="o">--</span><span class="nx">port</span> <span class="mi">80</span> <span class="o">--</span><span class="nx">target</span><span class="o">-</span><span class="nx">port</span> <span class="mi">8080</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">exposed</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span>
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>   <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>        <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>        <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="o">&lt;</span><span class="nx">pending</span><span class="o">&gt;</span>     <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">20</span><span class="nx">s</span>
+
+</code></pre></div></div>
+
+<h6 id="validando-esta-como-pendente-o-external-ip-agora-vamos-configurar-o-metallib">Validando esta como pendente o “External-Ip”, agora vamos configurar o “MetalLib”:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml</span>
+<span class="nx">namespace</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">addresspools</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bfdprofiles</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgpadvertisements</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgppeers</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">communities</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipaddresspools</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">l2advertisements</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">role</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">role</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">pod</span><span class="o">-</span><span class="nx">lister</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">rolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">rolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">pod</span><span class="o">-</span><span class="nx">lister</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">secret</span><span class="o">/</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">server</span><span class="o">-</span><span class="nx">cert</span> <span class="nx">created</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">service</span> <span class="nx">created</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">daemonset</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">validatingwebhookconfiguration</span><span class="p">.</span><span class="nx">admissionregistration</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">configuration</span> <span class="nx">created</span>
+
+</code></pre></div></div>
+<h6 id="no-arquivo-ipaddresspoolyaml-informamos-um-range-de-ip">No arquivo “ipaddresspool.yaml” informamos um range de ip:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">v1beta1</span>
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">IPAddressPool</span>
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="k">default</span><span class="o">-</span><span class="nx">pool</span>
+  <span class="nx">namespace</span><span class="p">:</span> <span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">addresses</span><span class="p">:</span>
+  <span class="o">-</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span><span class="o">-</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.110</span>
+
+</code></pre></div></div>
+<h6 id="vamos-aplicar-outro-resorce">Vamos aplicar outro resorce:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">v1beta1</span>
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">L2Advertisement</span>
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="k">default</span>
+  <span class="nx">namespace</span><span class="p">:</span> <span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">ipAddressPools</span><span class="p">:</span>
+  <span class="o">-</span> <span class="k">default</span><span class="o">-</span><span class="nx">pool</span>
+
+</code></pre></div></div>
+
+<h6 id="vamos-agora-aplicar-os-dois-resources">Vamos agora aplicar os dois resources:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">ls</span> <span class="o">-</span><span class="nx">lh</span>
+<span class="nx">total</span> <span class="mi">16</span><span class="nx">K</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">452</span> <span class="nx">Apr</span> <span class="mi">13</span> <span class="mi">09</span><span class="p">:</span><span class="mi">48</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">161</span> <span class="nx">Apr</span> <span class="mi">17</span> <span class="mi">21</span><span class="p">:</span><span class="mi">47</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">148</span> <span class="nx">Apr</span> <span class="mi">17</span> <span class="mi">21</span><span class="p">:</span><span class="mi">47</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="k">default</span><span class="o">-</span><span class="nx">pool</span> <span class="nx">created</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="k">default</span> <span class="nx">created</span>
+</code></pre></div></div>
+
+<h6 id="vamos-validar">Vamos validar:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span>
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>     <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>        <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">9</span><span class="nx">m5s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>
+
+</code></pre></div></div>
+
+<h6 id="vamos-escalar-os-pods-e-realizar-os-teste">Vamos escalar os pods, e realizar os teste:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">scale</span>   <span class="nx">deployment</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">replicas</span><span class="o">=</span><span class="mi">4</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">scaled</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>              <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>             <span class="mi">0</span>          <span class="mi">16</span><span class="nx">m</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>
+</code></pre></div></div>
+
+<h6 id="vamos-provisionar-um-pod-mysql">Vamos provisionar um pod mysql:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">mysql</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">v1</span>                  
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">Pod</span>                       
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>
+  <span class="nx">labels</span><span class="p">:</span>
+    <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">containers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="nx">resources</span><span class="p">:</span>
+        <span class="nx">limits</span><span class="p">:</span>
+            <span class="nx">cpu</span><span class="p">:</span> <span class="mf">0.5</span>
+      <span class="nx">image</span><span class="p">:</span> <span class="nx">centos</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="mi">57</span><span class="o">-</span><span class="nx">centos7</span><span class="p">:</span><span class="mf">5.7</span>
+      <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span>
+      <span class="nx">env</span><span class="p">:</span>
+        <span class="o">-</span> <span class="nx">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">MYSQL_ROOT_PASSWORD</span><span class="dl">"</span>
+          <span class="nx">value</span><span class="p">:</span> <span class="dl">"</span><span class="s2">senha</span><span class="dl">"</span>         
+      <span class="nx">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="nx">containerPort</span><span class="p">:</span> <span class="mi">3306</span>
+          <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">mysql</span><span class="p">.</span><span class="nx">yaml</span> 
+<span class="nx">pod</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="nx">created</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">27</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">19</span><span class="nx">m</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">pod</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="o">--</span><span class="nx">type</span> <span class="nx">LoadBalancer</span> <span class="o">--</span><span class="nx">port</span> <span class="mi">3306</span> <span class="o">--</span><span class="nx">target</span><span class="o">-</span><span class="nx">port</span> <span class="mi">3306</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="nx">exposed</span>
+
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>     <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>          <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>          <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>    <span class="nx">LoadBalancer</span>   <span class="mf">10.106</span><span class="p">.</span><span class="mf">14.178</span>    <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span>   <span class="mi">3306</span><span class="p">:</span><span class="mi">30523</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">26</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>     <span class="mi">18</span><span class="nx">m</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">telnet</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span> <span class="mi">3306</span>
+<span class="nx">Trying</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span><span class="p">...</span>
+<span class="nx">Connected</span> <span class="nx">to</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span><span class="p">.</span>
+<span class="nx">Escape</span> <span class="nx">character</span> <span class="nx">is</span> <span class="dl">'</span><span class="s1">^]</span><span class="dl">'</span><span class="p">.</span>
+<span class="nx">J</span>
+<span class="mf">5.7</span><span class="p">.</span><span class="mi">24</span><span class="p">]</span><span class="mi">8</span><span class="nx">MNj7aDp</span><span class="p">.</span><span class="nx">MV</span><span class="p">}</span><span class="o">=</span><span class="mi">4</span><span class="nx">xmysql_native_password</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">mysql</span> <span class="o">--</span><span class="nx">password</span><span class="o">=</span><span class="nx">senha</span> <span class="o">--</span><span class="nx">user</span><span class="o">=</span><span class="nx">root</span> <span class="o">--</span><span class="nx">host</span><span class="o">=</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span>
+<span class="nx">mysql</span><span class="p">:</span> <span class="p">[</span><span class="nx">Warning</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">a</span> <span class="nx">password</span> <span class="nx">on</span> <span class="nx">the</span> <span class="nx">command</span> <span class="nx">line</span> <span class="kr">interface</span> <span class="nx">can</span> <span class="nx">be</span> <span class="nx">insecure</span><span class="p">.</span>
+<span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">MySQL</span> <span class="nx">monitor</span><span class="p">.</span>  <span class="nx">Commands</span> <span class="nx">end</span> <span class="kd">with</span> <span class="p">;</span> <span class="nx">or</span> <span class="err">\</span><span class="nx">g</span><span class="p">.</span>
+<span class="nx">Your</span> <span class="nx">MySQL</span> <span class="nx">connection</span> <span class="nx">id</span> <span class="nx">is</span> <span class="mi">3</span>
+<span class="nx">Server</span> <span class="nx">version</span><span class="p">:</span> <span class="mf">5.7</span><span class="p">.</span><span class="mi">24</span> <span class="nx">MySQL</span> <span class="nx">Community</span> <span class="nc">Server </span><span class="p">(</span><span class="nx">GPL</span><span class="p">)</span>
+
+<span class="nc">Copyright </span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">2024</span><span class="p">,</span> <span class="nx">Oracle</span> <span class="nx">and</span><span class="o">/</span><span class="nx">or</span> <span class="nx">its</span> <span class="nx">affiliates</span><span class="p">.</span>
+
+<span class="nx">Oracle</span> <span class="nx">is</span> <span class="nx">a</span> <span class="nx">registered</span> <span class="nx">trademark</span> <span class="k">of</span> <span class="nx">Oracle</span> <span class="nx">Corporation</span> <span class="nx">and</span><span class="o">/</span><span class="nx">or</span> <span class="nx">its</span>
+<span class="nx">affiliates</span><span class="p">.</span> <span class="nx">Other</span> <span class="nx">names</span> <span class="nx">may</span> <span class="nx">be</span> <span class="nx">trademarks</span> <span class="k">of</span> <span class="nx">their</span> <span class="nx">respective</span>
+<span class="nx">owners</span><span class="p">.</span>
+
+<span class="nx">Type</span> <span class="dl">'</span><span class="s1">help;</span><span class="dl">'</span> <span class="nx">or</span> <span class="dl">'</span><span class="se">\</span><span class="s1">h</span><span class="dl">'</span> <span class="k">for</span> <span class="nx">help</span><span class="p">.</span> <span class="nx">Type</span> <span class="dl">'</span><span class="se">\</span><span class="s1">c</span><span class="dl">'</span> <span class="nx">to</span> <span class="nx">clear</span> <span class="nx">the</span> <span class="nx">current</span> <span class="nx">input</span> <span class="nx">statement</span><span class="p">.</span>
+
+<span class="nx">mysql</span><span class="o">&gt;</span> 
+
+</code></pre></div></div>
+
+<h1>!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+<h1 id="-fim-">!!!!!!!!!! FIM !!!!!!!!!!!</h1>
+<h1 id="-1">!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Kubernets" /><summary type="html"><![CDATA[Nesse post vamos expor app utilizando ip local utilizando Metallb no Kubernets]]></summary></entry><entry><title type="html">Exemplo de como provisionar cluster “Kubernets” local com “KubeAdmin”</title><link href="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/" rel="alternate" type="text/html" title="Exemplo de como provisionar cluster “Kubernets” local com “KubeAdmin”" /><published>2024-04-12T00:00:00-03:00</published><updated>2024-04-12T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/criando-cluster-com-kubeadmin</id><content type="html" xml:base="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/"><![CDATA[<h6 id="nesse-post-vamos-provisionar-cluster-kubernets-utilizando-vagrant-kubeadmin-e-shellscript">Nesse post vamos provisionar cluster Kubernets utilizando Vagrant KubeAdmin e ShellScript</h6>
+
+<h5 id="segue-pre-requisitos">Segue pre-requisitos:</h5>
+<ol>
+  <li>Linux</li>
+  <li>
+    <p>VirtualBox</p>
+  </li>
+  <li>192.168.0.30 - no master</li>
+  <li>192.168.0.20 - no escravo</li>
+</ol>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/work.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="instalar-o-vagrant">Instalar o Vagrant:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">sudo</span> <span class="nx">apt</span><span class="o">-</span><span class="kd">get</span> <span class="nx">update</span> <span class="o">&amp;&amp;</span> <span class="nx">sudo</span> <span class="nx">apt</span> <span class="nx">install</span> <span class="nx">vagrant</span>
+</code></pre></div></div>
+<h6 id="criar-um-diretorio-e-iniciar-o-vangrat">Criar um diretorio e iniciar o vangrat:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">mkdir</span> <span class="nx">projeto</span><span class="o">-</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">kubernets</span>
+<span class="nx">cd</span> <span class="nx">projeto</span><span class="o">-</span><span class="nx">cluster</span><span class="o">-</span><span class="nx">kubernets</span>
+</code></pre></div></div>
+<h6 id="vamos-agora-criar-o-arquivo-vagrantfile-no-diretorio-raiz-do-projeto-alguns-pontos-">Vamos agora criar o arquivo Vagrantfile no diretorio raiz do projeto, alguns pontos :</h6>
+
+<ol>
+  <li>Vm Master vai ter 2 Cpus e 2Gbs</li>
+  <li>as Vms vai ter 1 cpu e 1GB</li>
+  <li>“provision.sh” sera nosso script de instalação, sera entregue as 3 vms ja com o kubeadmin instalado</li>
+  <li>Validar gateway que esta utilizando, nesse exemplo estou utilizando 192.168.0.1, consegue com o comando “ifconfig”</li>
+  <li>Imagem que vamos utilizar “ubuntu/focal64”</li>
+</ol>
+
+<h6 id="segue-vagrantfile">Segue Vagrantfile:</h6>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">vim</span> <span class="no">Vagrantfile</span>
+
+<span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
+
+<span class="n">vms</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">'master'</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s1">'memory'</span> <span class="o">=&gt;</span> <span class="s1">'2048'</span><span class="p">,</span> <span class="s1">'cpus'</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'ip'</span> <span class="o">=&gt;</span> <span class="s1">'30'</span><span class="p">,</span> <span class="s1">'provision'</span> <span class="o">=&gt;</span> <span class="s1">'provision.sh'</span><span class="p">},</span>
+  <span class="s1">'node1'</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s1">'memory'</span> <span class="o">=&gt;</span> <span class="s1">'3072'</span><span class="p">,</span> <span class="s1">'cpus'</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'ip'</span> <span class="o">=&gt;</span> <span class="s1">'20'</span><span class="p">,</span> <span class="s1">'provision'</span> <span class="o">=&gt;</span> <span class="s1">'provision.sh'</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="no">Vagrant</span><span class="p">.</span><span class="nf">configure</span><span class="p">(</span><span class="s1">'2'</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+
+  <span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">box</span> <span class="o">=</span> <span class="s1">'ubuntu/focal64'</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">box_check_update</span> <span class="o">=</span> <span class="kp">false</span>
+  
+  <span class="n">vms</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">conf</span><span class="o">|</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">define</span> <span class="s2">"</span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span> <span class="k">do</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span>
+      <span class="n">k</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">hostname</span> <span class="o">=</span> <span class="s2">"</span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">.example.com"</span>
+      <span class="n">k</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">network</span> <span class="s1">'public_network'</span><span class="p">,</span> <span class="ss">ip: </span><span class="s2">"192.168.0.</span><span class="si">#{</span><span class="n">conf</span><span class="p">[</span><span class="s1">'ip'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="ss">bridge: </span><span class="s2">"wlp2s0"</span>
+      <span class="n">k</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">provider</span> <span class="s1">'virtualbox'</span> <span class="k">do</span> <span class="o">|</span><span class="n">vb</span><span class="o">|</span>
+        <span class="n">vb</span><span class="p">.</span><span class="nf">memory</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="s1">'memory'</span><span class="p">]</span>
+        <span class="n">vb</span><span class="p">.</span><span class="nf">cpus</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="s1">'cpus'</span><span class="p">]</span>
+        <span class="n">vb</span><span class="p">.</span><span class="nf">name</span> <span class="o">=</span> <span class="s2">"</span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">end</span>
+      <span class="n">k</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">provision</span> <span class="s1">'shell'</span><span class="p">,</span> <span class="ss">path: </span><span class="s2">"provision/</span><span class="si">#{</span><span class="n">conf</span><span class="p">[</span><span class="s1">'provision'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+      <span class="c1"># k.vm.provision "file", source: "./provision/debian.sh", destination: "/home/ubuntu/provision_teste"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+<h6 id="segue-script-para-configurar-e-instalar-todos-os-pacotes-necessario">Segue script para configurar e instalar todos os pacotes necessario:</h6>
+
+<h6 id="alguns-pontos">Alguns pontos</h6>
+<ol>
+  <li>Se quiser adicionar sua chave, adicione sua chave pub na variavel “KEY”</li>
+  <li>Sera criado um usuario chamado “super” contendo a chave pub mencionada na variavel, fique a vontade para escolher o nome de usuario, mais nao sera necessario porque o vagrant ja tem um usuario ssh que conecta as Vm provisionada</li>
+  <li>Nao precisamos do docker mais sim da versao do containerd mais recente</li>
+</ol>
+
+<h6 id="segue-estrutura">Segue estrutura:</h6>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>tree
+├── provision
+│   ├── provision.sh
+├── Vagrantfile
+</code></pre></div></div>
+
+<h6 id="segue-arquivo-provisionsh">Segue arquivo provision.sh</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">echo</span> <span class="s2">" ############## Inicio ###############"</span>
+
+<span class="nv">KEY</span><span class="o">=</span><span class="s2">"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDrhj1fZIf/VIgXYkDI/2w4q72I5ATts5sqVTtT8WWCsmpQxS0IxtzSb5i2/Ds20RSWqsZrBd/6Ay4kouqXAIFxX+k9pgrSdvSGPZ2UFsFu1iLpZKnf10PZjUiY5FbaQuPz8K+UmWd6dsDJjfbOtir544QpUEk/ddBKplLyzXxFUo73CEanF96xlFAoSIrFjxrgdnA4GKm0mJuFY/vTEM6A5G9ZmpJ/9ZZlmWAQ+St6//epLScMnhz3Z9k61WWK0LiQ8GX5yxjVVgVCgisURUMPAOAQiusD3FqDlTXniLcCnOTL3itDijuCT2jATCWLanj6VvRglJFXP46LgXCpC8/h6x0PCb1lMSMFCWppMJseEd6zj9fneO4gibWsAL2OOS5nwfT5Q1fGL76ZSjJ1+fn81ihc0sczDO2IjvXZVXPLTwt1o8eyvFx7BFLWrurIgHq+W+zGl5/yY+6cdsdasdasdasdadads= chave@chave"</span>
+<span class="nb">sudo </span>useradd <span class="nt">-m</span> <span class="nt">-s</span> /bin/bash super 
+<span class="nb">sudo </span>su <span class="nt">-c</span> <span class="s2">"mkdir /home/super/.ssh/"</span> <span class="nt">-s</span> /bin/bash super
+<span class="nb">sudo </span>su <span class="nt">-c</span> <span class="s2">"echo </span><span class="nv">$KEY</span><span class="s2"> &gt;&gt; /home/super/.ssh/authorized_keys"</span> <span class="nt">-s</span> /bin/bash super
+<span class="nb">sudo </span>sh <span class="nt">-c</span> <span class="s2">"echo 'super ALL=NOPASSWD:ALL' &gt;&gt; /etc/sudoers"</span>
+
+<span class="nb">echo</span> <span class="s2">" ############## Configurando A Vm ###############"</span>
+
+<span class="nb">sudo cat</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh"> | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+</span><span class="no">EOF
+</span><span class="nb">sudo </span>modprobe overlay
+<span class="nb">sudo </span>modprobe br_netfilter
+<span class="nb">sudo cat</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh"> | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.ipv4.ip_forward                 = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+</span><span class="no">EOF
+</span><span class="nb">sudo </span>sysctl <span class="nt">--system</span>
+<span class="nb">sudo </span>apt-get update
+
+<span class="nb">echo</span> <span class="s2">" ############## Instalando o Docker e Containerid ###############"</span>
+
+<span class="nb">sudo </span>apt-get <span class="nb">install </span>ca-certificates curl gnupg <span class="nt">--yes</span>
+<span class="nb">sudo install</span> <span class="nt">-m</span> 0755 <span class="nt">-d</span> /etc/apt/keyrings
+curl <span class="nt">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg | <span class="nb">sudo </span>gpg <span class="nt">--dearmor</span> <span class="nt">-o</span> /etc/apt/keyrings/docker.gpg
+<span class="nb">sudo chmod </span>a+r /etc/apt/keyrings/docker.gpg
+<span class="nb">echo</span> <span class="s2">"deb [arch=</span><span class="si">$(</span>dpkg <span class="nt">--print-architecture</span><span class="si">)</span><span class="s2"> signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu </span><span class="se">\</span><span class="s2">
+  </span><span class="si">$(</span><span class="nb">.</span> /etc/os-release <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">"</span><span class="nv">$VERSION_CODENAME</span><span class="s2">"</span><span class="si">)</span><span class="s2"> stable"</span> |   <span class="nb">sudo tee</span> /etc/apt/sources.list.d/docker.list <span class="o">&gt;</span> /dev/null
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt <span class="nb">install </span>containerd.io <span class="nt">-y</span>
+<span class="nb">sudo mkdir</span> <span class="nt">-p</span> /etc/containerd <span class="o">&amp;&amp;</span> containerd config default | <span class="nb">sudo tee</span> /etc/containerd/config.toml 
+<span class="nb">sudo sed</span> <span class="nt">-i</span> <span class="s1">'s/SystemdCgroup = false/SystemdCgroup = true/g'</span> /etc/containerd/config.toml
+<span class="nb">sudo </span>systemctl restart containerd
+
+<span class="nb">echo</span> <span class="s2">" ############## Instalando Kubernets ###############"</span>
+
+<span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> apt-transport-https ca-certificates curl
+curl <span class="nt">-fsSL</span> https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | <span class="nb">sudo </span>gpg <span class="nt">--dearmor</span> <span class="nt">-o</span> /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+<span class="nb">echo</span> <span class="s1">'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /'</span> | <span class="nb">sudo tee</span> /etc/apt/sources.list.d/kubernetes.list
+<span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> kubelet kubeadm kubectl 
+<span class="nb">sudo </span>apt-mark hold kubelet kubeadm kubectl 
+
+<span class="nb">echo</span> <span class="s2">" ############## Fim ###############"</span>
+</code></pre></div></div>
+
+<h6 id="caso-precise-provisionar-apenas-um-dos-no-apenas-o-nome-no-provisionamento-do-vagrant">Caso precise provisionar apenas um dos no apenas o nome no provisionamento do vagrant</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant up master
+</code></pre></div></div>
+
+<h6 id="se-for-provisionar-as-3-vms">Se for provisionar as 3 Vms:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant up 
+</code></pre></div></div>
+<h6 id="para-ver-o-status">Para ver o status</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant status
+</code></pre></div></div>
+
+<h6 id="outra-dica-seria-criar-um-snapshot-quando-finalizar-o-provisionamento">Outra dica seria criar um snapshot quando finalizar o provisionamento:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant snapshot save master snapshot-master-01
+</code></pre></div></div>
+
+<h6 id="para-listar-os-snapshot">Para listar os snapshot:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant snapshot list
+</code></pre></div></div>
+
+<h6 id="para-restaura-vm-a-partir-do-snapshot">Para restaura vm a partir do snapshot:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant snapshot restore snapshot-master-01
+</code></pre></div></div>
+
+<h6 id="para-destruir-todas-as-vms--f-e-pra-forcar">Para destruir todas as Vms, -f e pra forcar:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant destroy <span class="nt">-f</span>
+</code></pre></div></div>
+
+<h6 id="para-destruir-apenas-1-vm">Para destruir apenas 1 Vm:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vagrant destroy master <span class="nt">-f</span>
+</code></pre></div></div>
+
+<h4 id="vamos-comecar-entao">Vamos comecar entao:</h4>
+
+<h6 id="segue-linhas-para-instalar-executar-como-root-porque-precisa-de-permissoes">Segue linhas para instalar, executar como root porque precisa de permissoes:</h6>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>vagrant up 
+Bringing machine <span class="s1">'master'</span> up with <span class="s1">'virtualbox'</span> provider...
+Bringing machine <span class="s1">'node1'</span> up with <span class="s1">'virtualbox'</span> provider...
+<span class="o">==&gt;</span> master: Importing base box <span class="s1">'ubuntu/focal64'</span>...
+<span class="o">==&gt;</span> master: Matching MAC address <span class="k">for </span>NAT networking...
+<span class="o">==&gt;</span> master: Setting the name of the VM: master
+<span class="o">==&gt;</span> master: Clearing any previously <span class="nb">set </span>network interfaces...
+<span class="o">==&gt;</span> master: Preparing network interfaces based on configuration...
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>vagrant status
+Current machine states:
+
+master                    running <span class="o">(</span>virtualbox<span class="o">)</span>
+node1                     running <span class="o">(</span>virtualbox<span class="o">)</span>
+
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>vagrant snapshot save master snapshot-master-01
+<span class="o">==&gt;</span> master: Snapshotting the machine as <span class="s1">'snapshot-master-01'</span>...
+<span class="o">==&gt;</span> master: Snapshot saved! You can restore the snapshot at any <span class="nb">time </span>by
+<span class="o">==&gt;</span> master: using <span class="sb">`</span>vagrant snapshot restore<span class="sb">`</span><span class="nb">.</span> You can delete it using
+<span class="o">==&gt;</span> master: <span class="sb">`</span>vagrant snapshot delete<span class="sb">`</span><span class="nb">.</span>
+mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>vagrant snapshot save node1 snapshot-node1
+<span class="o">==&gt;</span> node1: Snapshotting the machine as <span class="s1">'snapshot-node1'</span>...
+<span class="o">==&gt;</span> node1: Snapshot saved! You can restore the snapshot at any <span class="nb">time </span>by
+<span class="o">==&gt;</span> node1: using <span class="sb">`</span>vagrant snapshot restore<span class="sb">`</span><span class="nb">.</span> You can delete it using
+<span class="o">==&gt;</span> node1: <span class="sb">`</span>vagrant snapshot delete<span class="sb">`</span><span class="nb">.</span>
+</code></pre></div></div>
+
+<h6 id="para-acessar-as-vms-utilizando-vagrant-ssh">Para acessar as vms utilizando vagrant ssh:</h6>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mint@mint:~/projeto-cluster-kubernets<span class="nv">$ </span>vagrant ssh master
+Welcome to Ubuntu 20.04.6 LTS <span class="o">(</span>GNU/Linux 5.4.0-173-generic x86_64<span class="o">)</span>
+
+ <span class="k">*</span> Documentation:  https://help.ubuntu.com
+ <span class="k">*</span> Management:     https://landscape.canonical.com
+ <span class="k">*</span> Support:        https://ubuntu.com/pro
+
+  System information as of Fri Apr 12 23:15:30 UTC 2024
+
+  System load:             0.09
+  Usage of /:              5.5% of 38.70GB
+  Memory usage:            12%
+  Swap usage:              0%
+  Processes:               120
+  Users logged <span class="k">in</span>:         0
+  IPv4 address <span class="k">for </span>enp0s3: 10.0.2.15
+  IPv4 address <span class="k">for </span>enp0s8: 192.168.0.30
+  IPv6 address <span class="k">for </span>enp0s8: 2804:14c:111:92b5::1004
+  IPv6 address <span class="k">for </span>enp0s8: 2804:14c:111:92b5:a00:27ff:fe43:5c78
+
+
+Expanded Security Maintenance <span class="k">for </span>Applications is not enabled.
+
+35 updates can be applied immediately.
+28 of these updates are standard security updates.
+To see these additional updates run: apt list <span class="nt">--upgradable</span>
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: <span class="nb">sudo </span>pro status
+
+New release <span class="s1">'22.04.3 LTS'</span> available.
+Run <span class="s1">'do-release-upgrade'</span> to upgrade to it.
+
+
+vagrant@master:~<span class="nv">$ </span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ ssh super@192.168.0.3</span><span class="err">0
+</span><span class="nx">The</span> <span class="nx">authenticity</span> <span class="k">of</span> <span class="nx">host</span> <span class="dl">'</span><span class="s1">192.168.0.30 (192.168.0.30)</span><span class="dl">'</span> <span class="nx">can</span><span class="dl">'</span><span class="s1">t be established.
+ED25519 key fingerprint is SHA256:Vi7oAttqISwoevo1fjBgAmEOkuXPICXAIxlAfKJ5K1A.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added </span><span class="dl">'</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span><span class="dl">'</span><span class="s1"> (ED25519) to the list of known hosts.
+Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-173-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+  System information as of Fri Apr 12 23:51:26 UTC 2024
+
+  System load:             0.22
+  Usage of /:              5.5% of 38.70GB
+  Memory usage:            12%
+  Swap usage:              0%
+  Processes:               128
+  Users logged in:         0
+  IPv4 address for enp0s3: 10.0.2.15
+  IPv4 address for enp0s8: 192.168.0.30
+  IPv6 address for enp0s8: 2804:14c:111:92b5::1003
+  IPv6 address for enp0s8: 2804:14c:111:92b5:a00:27ff:fe5c:d669
+
+
+Expanded Security Maintenance for Applications is not enabled.
+
+35 updates can be applied immediately.
+28 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release </span><span class="dl">'</span><span class="mf">22.04</span><span class="p">.</span><span class="mi">3</span> <span class="nx">LTS</span><span class="dl">'</span><span class="s1"> available.
+Run </span><span class="dl">'</span><span class="k">do</span><span class="o">-</span><span class="nx">release</span><span class="o">-</span><span class="nx">upgrade</span><span class="dl">'</span><span class="s1"> to upgrade to it.
+
+
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+</span></code></pre></div></div>
+<h4 id="instalando-kubernets">Instalando Kubernets:</h4>
+
+<h6 id="vamos-utilizar-o-kubeadmin-pra-provisionar-o-kubernets-passando-o-ip-do-no-master-e-a-subrede">Vamos utilizar o kubeadmin pra provisionar o kubernets passando o ip do no master e a subrede:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">sudo</span> <span class="nx">kubeadm</span> <span class="nx">init</span> <span class="o">--</span><span class="nx">apiserver</span><span class="o">-</span><span class="nx">advertise</span><span class="o">-</span><span class="nx">address</span><span class="o">=</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span> <span class="o">--</span><span class="nx">pod</span><span class="o">-</span><span class="nx">network</span><span class="o">-</span><span class="nx">cidr</span><span class="o">=</span><span class="mf">10.244</span><span class="p">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span>
+<span class="p">[</span><span class="nx">init</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">Kubernetes</span> <span class="nx">version</span><span class="p">:</span> <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">Running</span> <span class="nx">pre</span><span class="o">-</span><span class="nx">flight</span> <span class="nx">checks</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">Pulling</span> <span class="nx">images</span> <span class="nx">required</span> <span class="k">for</span> <span class="nx">setting</span> <span class="nx">up</span> <span class="nx">a</span> <span class="nx">Kubernetes</span> <span class="nx">cluster</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">This</span> <span class="nx">might</span> <span class="nx">take</span> <span class="nx">a</span> <span class="nx">minute</span> <span class="nx">or</span> <span class="nx">two</span><span class="p">,</span> <span class="nx">depending</span> <span class="nx">on</span> <span class="nx">the</span> <span class="nx">speed</span> <span class="k">of</span> <span class="nx">your</span> <span class="nx">internet</span> <span class="nx">connection</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">You</span> <span class="nx">can</span> <span class="nx">also</span> <span class="nx">perform</span> <span class="k">this</span> <span class="nx">action</span> <span class="k">in</span> <span class="nx">beforehand</span> <span class="nx">using</span> <span class="dl">'</span><span class="s1">kubeadm config images pull</span><span class="dl">'</span>
+<span class="nx">W0413</span> <span class="mi">00</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">57.382608</span>    <span class="mi">5203</span> <span class="nx">checks</span><span class="p">.</span><span class="nx">go</span><span class="p">:</span><span class="mi">835</span><span class="p">]</span> <span class="nx">detected</span> <span class="nx">that</span> <span class="nx">the</span> <span class="nx">sandbox</span> <span class="nx">image</span> <span class="dl">"</span><span class="s2">registry.k8s.io/pause:3.6</span><span class="dl">"</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">container</span> <span class="nx">runtime</span> <span class="nx">is</span> <span class="nx">inconsistent</span> <span class="kd">with</span> <span class="nx">that</span> <span class="nx">used</span> <span class="nx">by</span> <span class="nx">kubeadm</span><span class="p">.</span> <span class="nx">It</span> <span class="nx">is</span> <span class="nx">recommended</span> <span class="nx">that</span> <span class="nx">using</span> <span class="dl">"</span><span class="s2">registry.k8s.io/pause:3.9</span><span class="dl">"</span> <span class="k">as</span> <span class="nx">the</span> <span class="nx">CRI</span> <span class="nx">sandbox</span> <span class="nx">image</span><span class="p">.</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">certificateDir</span> <span class="nx">folder</span> <span class="dl">"</span><span class="s2">/etc/kubernetes/pki</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">ca</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">apiserver</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">apiserver</span> <span class="nx">serving</span> <span class="nx">cert</span> <span class="nx">is</span> <span class="nx">signed</span> <span class="k">for</span> <span class="nx">DNS</span> <span class="nx">names</span> <span class="p">[</span><span class="nx">kubernetes</span> <span class="nx">kubernetes</span><span class="p">.</span><span class="k">default</span> <span class="nx">kubernetes</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="nx">svc</span> <span class="nx">kubernetes</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="nx">svc</span><span class="p">.</span><span class="nx">cluster</span><span class="p">.</span><span class="nx">local</span> <span class="nx">master</span><span class="p">]</span> <span class="nx">and</span> <span class="nx">IPs</span> <span class="p">[</span><span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">apiserver-kubelet-client</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">front-proxy-ca</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">front-proxy-client</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">etcd/ca</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">etcd/server</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">etcd</span><span class="o">/</span><span class="nx">server</span> <span class="nx">serving</span> <span class="nx">cert</span> <span class="nx">is</span> <span class="nx">signed</span> <span class="k">for</span> <span class="nx">DNS</span> <span class="nx">names</span> <span class="p">[</span><span class="nx">localhost</span> <span class="nx">master</span><span class="p">]</span> <span class="nx">and</span> <span class="nx">IPs</span> <span class="p">[</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span> <span class="mf">127.0</span><span class="p">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">etcd/peer</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">etcd</span><span class="o">/</span><span class="nx">peer</span> <span class="nx">serving</span> <span class="nx">cert</span> <span class="nx">is</span> <span class="nx">signed</span> <span class="k">for</span> <span class="nx">DNS</span> <span class="nx">names</span> <span class="p">[</span><span class="nx">localhost</span> <span class="nx">master</span><span class="p">]</span> <span class="nx">and</span> <span class="nx">IPs</span> <span class="p">[</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span> <span class="mf">127.0</span><span class="p">.</span><span class="mf">0.1</span> <span class="p">::</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">etcd/healthcheck-client</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">apiserver-etcd-client</span><span class="dl">"</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Generating</span> <span class="dl">"</span><span class="s2">sa</span><span class="dl">"</span> <span class="nx">key</span> <span class="nx">and</span> <span class="kr">public</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">kubeconfig</span> <span class="nx">folder</span> <span class="dl">"</span><span class="s2">/etc/kubernetes</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Writing</span> <span class="dl">"</span><span class="s2">admin.conf</span><span class="dl">"</span> <span class="nx">kubeconfig</span> <span class="nx">file</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Writing</span> <span class="dl">"</span><span class="s2">super-admin.conf</span><span class="dl">"</span> <span class="nx">kubeconfig</span> <span class="nx">file</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Writing</span> <span class="dl">"</span><span class="s2">kubelet.conf</span><span class="dl">"</span> <span class="nx">kubeconfig</span> <span class="nx">file</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Writing</span> <span class="dl">"</span><span class="s2">controller-manager.conf</span><span class="dl">"</span> <span class="nx">kubeconfig</span> <span class="nx">file</span>
+<span class="p">[</span><span class="nx">kubeconfig</span><span class="p">]</span> <span class="nx">Writing</span> <span class="dl">"</span><span class="s2">scheduler.conf</span><span class="dl">"</span> <span class="nx">kubeconfig</span> <span class="nx">file</span>
+<span class="p">[</span><span class="nx">etcd</span><span class="p">]</span> <span class="nx">Creating</span> <span class="kd">static</span> <span class="nx">Pod</span> <span class="nx">manifest</span> <span class="k">for</span> <span class="nx">local</span> <span class="nx">etcd</span> <span class="k">in</span> <span class="dl">"</span><span class="s2">/etc/kubernetes/manifests</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">manifest</span> <span class="nx">folder</span> <span class="dl">"</span><span class="s2">/etc/kubernetes/manifests</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Creating</span> <span class="kd">static</span> <span class="nx">Pod</span> <span class="nx">manifest</span> <span class="k">for</span> <span class="dl">"</span><span class="s2">kube-apiserver</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Creating</span> <span class="kd">static</span> <span class="nx">Pod</span> <span class="nx">manifest</span> <span class="k">for</span> <span class="dl">"</span><span class="s2">kube-controller-manager</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Creating</span> <span class="kd">static</span> <span class="nx">Pod</span> <span class="nx">manifest</span> <span class="k">for</span> <span class="dl">"</span><span class="s2">kube-scheduler</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Writing</span> <span class="nx">kubelet</span> <span class="nx">environment</span> <span class="nx">file</span> <span class="kd">with</span> <span class="nx">flags</span> <span class="nx">to</span> <span class="nx">file</span> <span class="dl">"</span><span class="s2">/var/lib/kubelet/kubeadm-flags.env</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Writing</span> <span class="nx">kubelet</span> <span class="nx">configuration</span> <span class="nx">to</span> <span class="nx">file</span> <span class="dl">"</span><span class="s2">/var/lib/kubelet/config.yaml</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Starting</span> <span class="nx">the</span> <span class="nx">kubelet</span>
+<span class="p">[</span><span class="nx">wait</span><span class="o">-</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Waiting</span> <span class="k">for</span> <span class="nx">the</span> <span class="nx">kubelet</span> <span class="nx">to</span> <span class="nx">boot</span> <span class="nx">up</span> <span class="nx">the</span> <span class="nx">control</span> <span class="nx">plane</span> <span class="k">as</span> <span class="kd">static</span> <span class="nx">Pods</span> <span class="k">from</span> <span class="nx">directory</span> <span class="dl">"</span><span class="s2">/etc/kubernetes/manifests</span><span class="dl">"</span><span class="p">.</span> <span class="nx">This</span> <span class="nx">can</span> <span class="nx">take</span> <span class="nx">up</span> <span class="nx">to</span> <span class="mi">4</span><span class="nx">m0s</span>
+<span class="p">[</span><span class="nx">apiclient</span><span class="p">]</span> <span class="nx">All</span> <span class="nx">control</span> <span class="nx">plane</span> <span class="nx">components</span> <span class="nx">are</span> <span class="nx">healthy</span> <span class="nx">after</span> <span class="mf">12.004514</span> <span class="nx">seconds</span>
+<span class="p">[</span><span class="nx">upload</span><span class="o">-</span><span class="nx">config</span><span class="p">]</span> <span class="nx">Storing</span> <span class="nx">the</span> <span class="nx">configuration</span> <span class="nx">used</span> <span class="k">in</span> <span class="nx">ConfigMap</span> <span class="dl">"</span><span class="s2">kubeadm-config</span><span class="dl">"</span> <span class="k">in</span> <span class="nx">the</span> <span class="dl">"</span><span class="s2">kube-system</span><span class="dl">"</span> <span class="nx">Namespace</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="p">]</span> <span class="nx">Creating</span> <span class="nx">a</span> <span class="nx">ConfigMap</span> <span class="dl">"</span><span class="s2">kubelet-config</span><span class="dl">"</span> <span class="k">in</span> <span class="nx">namespace</span> <span class="nx">kube</span><span class="o">-</span><span class="nx">system</span> <span class="kd">with</span> <span class="nx">the</span> <span class="nx">configuration</span> <span class="k">for</span> <span class="nx">the</span> <span class="nx">kubelets</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">cluster</span>
+<span class="p">[</span><span class="nx">upload</span><span class="o">-</span><span class="nx">certs</span><span class="p">]</span> <span class="nx">Skipping</span> <span class="nx">phase</span><span class="p">.</span> <span class="nx">Please</span> <span class="nx">see</span> <span class="o">--</span><span class="nx">upload</span><span class="o">-</span><span class="nx">certs</span>
+<span class="p">[</span><span class="nx">mark</span><span class="o">-</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Marking</span> <span class="nx">the</span> <span class="nx">node</span> <span class="nx">master</span> <span class="k">as</span> <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span> <span class="nx">by</span> <span class="nx">adding</span> <span class="nx">the</span> <span class="nx">labels</span><span class="p">:</span> <span class="p">[</span><span class="nx">node</span><span class="o">-</span><span class="nx">role</span><span class="p">.</span><span class="nx">kubernetes</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span> <span class="nx">node</span><span class="p">.</span><span class="nx">kubernetes</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">exclude</span><span class="o">-</span><span class="k">from</span><span class="o">-</span><span class="nx">external</span><span class="o">-</span><span class="nx">load</span><span class="o">-</span><span class="nx">balancers</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">mark</span><span class="o">-</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">]</span> <span class="nx">Marking</span> <span class="nx">the</span> <span class="nx">node</span> <span class="nx">master</span> <span class="k">as</span> <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span> <span class="nx">by</span> <span class="nx">adding</span> <span class="nx">the</span> <span class="nx">taints</span> <span class="p">[</span><span class="nx">node</span><span class="o">-</span><span class="nx">role</span><span class="p">.</span><span class="nx">kubernetes</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="p">:</span><span class="nx">NoSchedule</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">token</span><span class="p">:</span> <span class="nx">xnsijh</span><span class="p">.</span><span class="mi">6</span><span class="nx">l9vu6g605tifatg</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Configuring</span> <span class="nx">bootstrap</span> <span class="nx">tokens</span><span class="p">,</span> <span class="nx">cluster</span><span class="o">-</span><span class="nx">info</span> <span class="nx">ConfigMap</span><span class="p">,</span> <span class="nx">RBAC</span> <span class="nx">Roles</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Configured</span> <span class="nx">RBAC</span> <span class="nx">rules</span> <span class="nx">to</span> <span class="nx">allow</span> <span class="nx">Node</span> <span class="nx">Bootstrap</span> <span class="nx">tokens</span> <span class="nx">to</span> <span class="kd">get</span> <span class="nx">nodes</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Configured</span> <span class="nx">RBAC</span> <span class="nx">rules</span> <span class="nx">to</span> <span class="nx">allow</span> <span class="nx">Node</span> <span class="nx">Bootstrap</span> <span class="nx">tokens</span> <span class="nx">to</span> <span class="nx">post</span> <span class="nx">CSRs</span> <span class="k">in</span> <span class="nx">order</span> <span class="k">for</span> <span class="nx">nodes</span> <span class="nx">to</span> <span class="kd">get</span> <span class="nx">long</span> <span class="nx">term</span> <span class="nx">certificate</span> <span class="nx">credentials</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Configured</span> <span class="nx">RBAC</span> <span class="nx">rules</span> <span class="nx">to</span> <span class="nx">allow</span> <span class="nx">the</span> <span class="nx">csrapprover</span> <span class="nx">controller</span> <span class="nx">automatically</span> <span class="nx">approve</span> <span class="nx">CSRs</span> <span class="k">from</span> <span class="nx">a</span> <span class="nx">Node</span> <span class="nx">Bootstrap</span> <span class="nx">Token</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Configured</span> <span class="nx">RBAC</span> <span class="nx">rules</span> <span class="nx">to</span> <span class="nx">allow</span> <span class="nx">certificate</span> <span class="nx">rotation</span> <span class="k">for</span> <span class="nx">all</span> <span class="nx">node</span> <span class="nx">client</span> <span class="nx">certificates</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">cluster</span>
+<span class="p">[</span><span class="nx">bootstrap</span><span class="o">-</span><span class="nx">token</span><span class="p">]</span> <span class="nx">Creating</span> <span class="nx">the</span> <span class="dl">"</span><span class="s2">cluster-info</span><span class="dl">"</span> <span class="nx">ConfigMap</span> <span class="k">in</span> <span class="nx">the</span> <span class="dl">"</span><span class="s2">kube-public</span><span class="dl">"</span> <span class="nx">namespace</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">finalize</span><span class="p">]</span> <span class="nx">Updating</span> <span class="dl">"</span><span class="s2">/etc/kubernetes/kubelet.conf</span><span class="dl">"</span> <span class="nx">to</span> <span class="nx">point</span> <span class="nx">to</span> <span class="nx">a</span> <span class="nx">rotatable</span> <span class="nx">kubelet</span> <span class="nx">client</span> <span class="nx">certificate</span> <span class="nx">and</span> <span class="nx">key</span>
+<span class="p">[</span><span class="nx">addons</span><span class="p">]</span> <span class="nx">Applied</span> <span class="nx">essential</span> <span class="nx">addon</span><span class="p">:</span> <span class="nx">CoreDNS</span>
+<span class="p">[</span><span class="nx">addons</span><span class="p">]</span> <span class="nx">Applied</span> <span class="nx">essential</span> <span class="nx">addon</span><span class="p">:</span> <span class="nx">kube</span><span class="o">-</span><span class="nx">proxy</span>
+
+<span class="nx">Your</span> <span class="nx">Kubernetes</span> <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span> <span class="nx">has</span> <span class="nx">initialized</span> <span class="nx">successfully</span><span class="o">!</span>
+
+<span class="nx">To</span> <span class="nx">start</span> <span class="nx">using</span> <span class="nx">your</span> <span class="nx">cluster</span><span class="p">,</span> <span class="nx">you</span> <span class="nx">need</span> <span class="nx">to</span> <span class="nx">run</span> <span class="nx">the</span> <span class="nx">following</span> <span class="k">as</span> <span class="nx">a</span> <span class="nx">regular</span> <span class="nx">user</span><span class="p">:</span>
+
+  <span class="nx">mkdir</span> <span class="o">-</span><span class="nx">p</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span>
+  <span class="nx">sudo</span> <span class="nx">cp</span> <span class="o">-</span><span class="nx">i</span> <span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">kubernetes</span><span class="o">/</span><span class="nx">admin</span><span class="p">.</span><span class="nx">conf</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">config</span>
+  <span class="nx">sudo</span> <span class="nx">chown</span> <span class="nf">$</span><span class="p">(</span><span class="nx">id</span> <span class="o">-</span><span class="nx">u</span><span class="p">):</span><span class="nf">$</span><span class="p">(</span><span class="nx">id</span> <span class="o">-</span><span class="nx">g</span><span class="p">)</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">config</span>
+
+<span class="nx">Alternatively</span><span class="p">,</span> <span class="k">if</span> <span class="nx">you</span> <span class="nx">are</span> <span class="nx">the</span> <span class="nx">root</span> <span class="nx">user</span><span class="p">,</span> <span class="nx">you</span> <span class="nx">can</span> <span class="nx">run</span><span class="p">:</span>
+
+  <span class="k">export</span> <span class="nx">KUBECONFIG</span><span class="o">=</span><span class="sr">/etc/</span><span class="nx">kubernetes</span><span class="o">/</span><span class="nx">admin</span><span class="p">.</span><span class="nx">conf</span>
+
+<span class="nx">You</span> <span class="nx">should</span> <span class="nx">now</span> <span class="nx">deploy</span> <span class="nx">a</span> <span class="nx">pod</span> <span class="nx">network</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">cluster</span><span class="p">.</span>
+<span class="nx">Run</span> <span class="dl">"</span><span class="s2">kubectl apply -f [podnetwork].yaml</span><span class="dl">"</span> <span class="kd">with</span> <span class="nx">one</span> <span class="k">of</span> <span class="nx">the</span> <span class="nx">options</span> <span class="nx">listed</span> <span class="nx">at</span><span class="p">:</span>
+  <span class="nx">https</span><span class="p">:</span><span class="c1">//kubernetes.io/docs/concepts/cluster-administration/addons/</span>
+
+<span class="nx">Then</span> <span class="nx">you</span> <span class="nx">can</span> <span class="nx">join</span> <span class="nx">any</span> <span class="nx">number</span> <span class="k">of</span> <span class="nx">worker</span> <span class="nx">nodes</span> <span class="nx">by</span> <span class="nx">running</span> <span class="nx">the</span> <span class="nx">following</span> <span class="nx">on</span> <span class="nx">each</span> <span class="k">as</span> <span class="nx">root</span><span class="p">:</span>
+
+<span class="nx">kubeadm</span> <span class="nx">join</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="nx">token</span> <span class="nx">xnsijh</span><span class="p">.</span><span class="mi">6</span><span class="nx">l9vu6g605tifatg</span> <span class="o">\</span>
+	<span class="o">--</span><span class="nx">discovery</span><span class="o">-</span><span class="nx">token</span><span class="o">-</span><span class="nx">ca</span><span class="o">-</span><span class="nx">cert</span><span class="o">-</span><span class="nx">hash</span> <span class="nx">sha256</span><span class="p">:</span><span class="mi">6</span><span class="nx">bf31f9188e0d4ebc67dd6a09dfd89167570fffeb14e2cda5465e552863e4108</span> 
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">mkdir</span> <span class="o">-</span><span class="nx">p</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">sudo</span> <span class="nx">cp</span> <span class="o">-</span><span class="nx">i</span> <span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">kubernetes</span><span class="o">/</span><span class="nx">admin</span><span class="p">.</span><span class="nx">conf</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">config</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">sudo</span> <span class="nx">chown</span> <span class="nf">$</span><span class="p">(</span><span class="nx">id</span> <span class="o">-</span><span class="nx">u</span><span class="p">):</span><span class="nf">$</span><span class="p">(</span><span class="nx">id</span> <span class="o">-</span><span class="nx">g</span><span class="p">)</span> <span class="nx">$HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">config</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">A</span>
+<span class="nx">NAMESPACE</span>     <span class="nx">NAME</span>                             <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">ntbsk</span>         <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">73</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">sgqw2</span>         <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">73</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">etcd</span><span class="o">-</span><span class="nx">master</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">86</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">apiserver</span><span class="o">-</span><span class="nx">master</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">86</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">controller</span><span class="o">-</span><span class="nx">manager</span><span class="o">-</span><span class="nx">master</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">86</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">proxy</span><span class="o">-</span><span class="mi">2</span><span class="nx">hgxn</span>                 <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">72</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">scheduler</span><span class="o">-</span><span class="nx">master</span>            <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/calico.yaml</span>
+<span class="nx">poddisruptionbudget</span><span class="p">.</span><span class="nx">policy</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">node</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">cni</span><span class="o">-</span><span class="nx">plugin</span> <span class="nx">created</span>
+<span class="nx">configmap</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">config</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgpconfigurations</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgpfilters</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgppeers</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">blockaffinities</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">caliconodestatuses</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">clusterinformations</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">felixconfigurations</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">globalnetworkpolicies</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">globalnetworksets</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">hostendpoints</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipamblocks</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipamconfigs</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipamhandles</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ippools</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipreservations</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">kubecontrollersconfigurations</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">networkpolicies</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">networksets</span><span class="p">.</span><span class="nx">crd</span><span class="p">.</span><span class="nx">projectcalico</span><span class="p">.</span><span class="nx">org</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">node</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">cni</span><span class="o">-</span><span class="nx">plugin</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">node</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">cni</span><span class="o">-</span><span class="nx">plugin</span> <span class="nx">created</span>
+<span class="nx">daemonset</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">node</span> <span class="nx">created</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span> <span class="nx">created</span>
+</code></pre></div></div>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">A</span>
+<span class="nx">NAMESPACE</span>     <span class="nx">NAME</span>                                       <span class="nx">READY</span>   <span class="nx">STATUS</span>     <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span><span class="o">-</span><span class="mi">74</span><span class="nx">d5f9d7bb</span><span class="o">-</span><span class="mi">9</span><span class="nx">cknt</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>    <span class="mi">0</span>          <span class="mi">26</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">calico</span><span class="o">-</span><span class="nx">node</span><span class="o">-</span><span class="mi">6</span><span class="nx">kd96</span>                          <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Init</span><span class="p">:</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span>   <span class="mi">0</span>          <span class="mi">26</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">ntbsk</span>                   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m29s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">sgqw2</span>                   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m29s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">etcd</span><span class="o">-</span><span class="nx">master</span>                                <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m42s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">apiserver</span><span class="o">-</span><span class="nx">master</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m42s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">controller</span><span class="o">-</span><span class="nx">manager</span><span class="o">-</span><span class="nx">master</span>             <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m42s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">proxy</span><span class="o">-</span><span class="mi">2</span><span class="nx">hgxn</span>                           <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m28s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">scheduler</span><span class="o">-</span><span class="nx">master</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>    <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m43s</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">A</span>
+<span class="nx">NAMESPACE</span>     <span class="nx">NAME</span>                                       <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">calico</span><span class="o">-</span><span class="nx">kube</span><span class="o">-</span><span class="nx">controllers</span><span class="o">-</span><span class="mi">74</span><span class="nx">d5f9d7bb</span><span class="o">-</span><span class="mi">9</span><span class="nx">cknt</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">117</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">calico</span><span class="o">-</span><span class="nx">node</span><span class="o">-</span><span class="mi">6</span><span class="nx">kd96</span>                          <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">117</span><span class="nx">s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">ntbsk</span>                   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">coredns</span><span class="o">-</span><span class="mi">76</span><span class="nx">f75df574</span><span class="o">-</span><span class="nx">sgqw2</span>                   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">etcd</span><span class="o">-</span><span class="nx">master</span>                                <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m13s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">apiserver</span><span class="o">-</span><span class="nx">master</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m13s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">controller</span><span class="o">-</span><span class="nx">manager</span><span class="o">-</span><span class="nx">master</span>             <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m13s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">proxy</span><span class="o">-</span><span class="mi">2</span><span class="nx">hgxn</span>                           <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m59s</span>
+<span class="nx">kube</span><span class="o">-</span><span class="nx">system</span>   <span class="nx">kube</span><span class="o">-</span><span class="nx">scheduler</span><span class="o">-</span><span class="nx">master</span>                      <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="nx">m14s</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ vagrant ssh node</span><span class="err">1
+</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">Ubuntu</span> <span class="mf">20.04</span><span class="p">.</span><span class="mi">6</span> <span class="nc">LTS </span><span class="p">(</span><span class="nx">GNU</span><span class="o">/</span><span class="nx">Linux</span> <span class="mf">5.4</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">173</span><span class="o">-</span><span class="nx">generic</span> <span class="nx">x86_64</span><span class="p">)</span>
+
+ <span class="o">*</span> <span class="nx">Documentation</span><span class="p">:</span>  <span class="nx">https</span><span class="p">:</span><span class="c1">//help.ubuntu.com</span>
+ <span class="o">*</span> <span class="nx">Management</span><span class="p">:</span>     <span class="nx">https</span><span class="p">:</span><span class="c1">//landscape.canonical.com</span>
+ <span class="o">*</span> <span class="nx">Support</span><span class="p">:</span>        <span class="nx">https</span><span class="p">:</span><span class="c1">//ubuntu.com/pro</span>
+
+  <span class="nx">System</span> <span class="nx">information</span> <span class="k">as</span> <span class="k">of</span> <span class="nx">Sat</span> <span class="nx">Apr</span> <span class="mi">13</span> <span class="mi">00</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">07</span> <span class="nx">UTC</span> <span class="mi">2024</span>
+
+  <span class="nx">System</span> <span class="nx">load</span><span class="p">:</span>             <span class="mf">0.0</span>
+  <span class="nx">Usage</span> <span class="k">of</span> <span class="sr">/:              5.5% of 38.70G</span><span class="err">B
+</span>  <span class="nx">Memory</span> <span class="nx">usage</span><span class="p">:</span>            <span class="mi">20</span><span class="o">%</span>
+  <span class="nx">Swap</span> <span class="nx">usage</span><span class="p">:</span>              <span class="mi">0</span><span class="o">%</span>
+  <span class="nx">Processes</span><span class="p">:</span>               <span class="mi">106</span>
+  <span class="nx">Users</span> <span class="nx">logged</span> <span class="k">in</span><span class="p">:</span>         <span class="mi">0</span>
+  <span class="nx">IPv4</span> <span class="nx">address</span> <span class="k">for</span> <span class="nx">enp0s3</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">.</span><span class="mf">2.15</span>
+  <span class="nx">IPv4</span> <span class="nx">address</span> <span class="k">for</span> <span class="nx">enp0s8</span><span class="p">:</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.20</span>
+  <span class="nx">IPv6</span> <span class="nx">address</span> <span class="k">for</span> <span class="nx">enp0s8</span><span class="p">:</span> <span class="mi">2804</span><span class="p">:</span><span class="mi">14</span><span class="nx">c</span><span class="p">:</span><span class="mi">111</span><span class="p">:</span><span class="mi">92</span><span class="nx">b5</span><span class="p">::</span><span class="mi">1007</span>
+  <span class="nx">IPv6</span> <span class="nx">address</span> <span class="k">for</span> <span class="nx">enp0s8</span><span class="p">:</span> <span class="mi">2804</span><span class="p">:</span><span class="mi">14</span><span class="nx">c</span><span class="p">:</span><span class="mi">111</span><span class="p">:</span><span class="mi">92</span><span class="nx">b5</span><span class="p">:</span><span class="nx">a00</span><span class="p">:</span><span class="mi">27</span><span class="nx">ff</span><span class="p">:</span><span class="nx">fe8c</span><span class="p">:</span><span class="nx">f6b5</span>
+
+
+<span class="nx">Expanded</span> <span class="nx">Security</span> <span class="nx">Maintenance</span> <span class="k">for</span> <span class="nx">Applications</span> <span class="nx">is</span> <span class="nx">not</span> <span class="nx">enabled</span><span class="p">.</span>
+
+<span class="mi">35</span> <span class="nx">updates</span> <span class="nx">can</span> <span class="nx">be</span> <span class="nx">applied</span> <span class="nx">immediately</span><span class="p">.</span>
+<span class="mi">28</span> <span class="k">of</span> <span class="nx">these</span> <span class="nx">updates</span> <span class="nx">are</span> <span class="nx">standard</span> <span class="nx">security</span> <span class="nx">updates</span><span class="p">.</span>
+<span class="nx">To</span> <span class="nx">see</span> <span class="nx">these</span> <span class="nx">additional</span> <span class="nx">updates</span> <span class="nx">run</span><span class="p">:</span> <span class="nx">apt</span> <span class="nx">list</span> <span class="o">--</span><span class="nx">upgradable</span>
+
+<span class="nx">Enable</span> <span class="nx">ESM</span> <span class="nx">Apps</span> <span class="nx">to</span> <span class="nx">receive</span> <span class="nx">additional</span> <span class="nx">future</span> <span class="nx">security</span> <span class="nx">updates</span><span class="p">.</span>
+<span class="nx">See</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//ubuntu.com/esm or run: sudo pro status</span>
+
+<span class="nx">New</span> <span class="nx">release</span> <span class="dl">'</span><span class="s1">22.04.3 LTS</span><span class="dl">'</span> <span class="nx">available</span><span class="p">.</span>
+<span class="nx">Run</span> <span class="dl">'</span><span class="s1">do-release-upgrade</span><span class="dl">'</span> <span class="nx">to</span> <span class="nx">upgrade</span> <span class="nx">to</span> <span class="nx">it</span><span class="p">.</span>
+
+
+<span class="nx">vagrant</span><span class="p">@</span><span class="nd">node1</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">sudo</span> <span class="nx">su</span> <span class="o">-</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">node1</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubeadm</span> <span class="nx">join</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.30</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="nx">token</span> <span class="nx">xnsijh</span><span class="p">.</span><span class="mi">6</span><span class="nx">l9vu6g605tifatg</span> <span class="o">\</span>
+<span class="o">&gt;</span> <span class="o">--</span><span class="nx">discovery</span><span class="o">-</span><span class="nx">token</span><span class="o">-</span><span class="nx">ca</span><span class="o">-</span><span class="nx">cert</span><span class="o">-</span><span class="nx">hash</span> <span class="nx">sha256</span><span class="p">:</span><span class="mi">6</span><span class="nx">bf31f9188e0d4ebc67dd6a09dfd89167570fffeb14e2cda5465e552863e4108</span> 
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">Running</span> <span class="nx">pre</span><span class="o">-</span><span class="nx">flight</span> <span class="nx">checks</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">Reading</span> <span class="nx">configuration</span> <span class="k">from</span> <span class="nx">the</span> <span class="nx">cluster</span><span class="p">...</span>
+<span class="p">[</span><span class="nx">preflight</span><span class="p">]</span> <span class="nx">FYI</span><span class="p">:</span> <span class="nx">You</span> <span class="nx">can</span> <span class="nx">look</span> <span class="nx">at</span> <span class="k">this</span> <span class="nx">config</span> <span class="nx">file</span> <span class="kd">with</span> <span class="dl">'</span><span class="s1">kubectl -n kube-system get cm kubeadm-config -o yaml</span><span class="dl">'</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Writing</span> <span class="nx">kubelet</span> <span class="nx">configuration</span> <span class="nx">to</span> <span class="nx">file</span> <span class="dl">"</span><span class="s2">/var/lib/kubelet/config.yaml</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Writing</span> <span class="nx">kubelet</span> <span class="nx">environment</span> <span class="nx">file</span> <span class="kd">with</span> <span class="nx">flags</span> <span class="nx">to</span> <span class="nx">file</span> <span class="dl">"</span><span class="s2">/var/lib/kubelet/kubeadm-flags.env</span><span class="dl">"</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Starting</span> <span class="nx">the</span> <span class="nx">kubelet</span>
+<span class="p">[</span><span class="nx">kubelet</span><span class="o">-</span><span class="nx">start</span><span class="p">]</span> <span class="nx">Waiting</span> <span class="k">for</span> <span class="nx">the</span> <span class="nx">kubelet</span> <span class="nx">to</span> <span class="nx">perform</span> <span class="nx">the</span> <span class="nx">TLS</span> <span class="nx">Bootstrap</span><span class="p">...</span>
+
+<span class="nx">This</span> <span class="nx">node</span> <span class="nx">has</span> <span class="nx">joined</span> <span class="nx">the</span> <span class="nx">cluster</span><span class="p">:</span>
+<span class="o">*</span> <span class="nx">Certificate</span> <span class="nx">signing</span> <span class="nx">request</span> <span class="nx">was</span> <span class="nx">sent</span> <span class="nx">to</span> <span class="nx">apiserver</span> <span class="nx">and</span> <span class="nx">a</span> <span class="nx">response</span> <span class="nx">was</span> <span class="nx">received</span><span class="p">.</span>
+<span class="o">*</span> <span class="nx">The</span> <span class="nx">Kubelet</span> <span class="nx">was</span> <span class="nx">informed</span> <span class="k">of</span> <span class="nx">the</span> <span class="k">new</span> <span class="nx">secure</span> <span class="nx">connection</span> <span class="nx">details</span><span class="p">.</span>
+
+<span class="nx">Run</span> <span class="dl">'</span><span class="s1">kubectl get nodes</span><span class="dl">'</span> <span class="nx">on</span> <span class="nx">the</span> <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span> <span class="nx">to</span> <span class="nx">see</span> <span class="k">this</span> <span class="nx">node</span> <span class="nx">join</span> <span class="nx">the</span> <span class="nx">cluster</span><span class="p">.</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">node</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>     <span class="nx">ROLES</span>           <span class="nx">AGE</span>     <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>      <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">6</span><span class="nx">m15s</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">NotReady</span>   <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">34</span><span class="nx">s</span>     <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">node</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>     <span class="nx">ROLES</span>           <span class="nx">AGE</span>     <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>      <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">6</span><span class="nx">m17s</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">NotReady</span>   <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">36</span><span class="nx">s</span>     <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">node</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>     <span class="nx">ROLES</span>           <span class="nx">AGE</span>     <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>      <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">6</span><span class="nx">m20s</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">NotReady</span>   <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">39</span><span class="nx">s</span>     <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">node</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>   <span class="nx">ROLES</span>           <span class="nx">AGE</span>     <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>    <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">6</span><span class="nx">m54s</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">Ready</span>    <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">73</span><span class="nx">s</span>     <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim deploy-nginx.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+<span class="nt">---</span> 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30000
+  <span class="nb">type</span>: NodePort
+</code></pre></div></div>
+<h6 id="vamos-agora-provisionar-o-nginx-pra-ver-se-esta-tudo-funcionando">Vamos Agora provisionar o nginx pra ver se esta tudo funcionando</h6>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@master:~# kubectl create namespace nginx
+namespace/nginx created
+
+root@master:~# kubectl apply <span class="nt">-f</span> deploy-nginx.yaml <span class="nt">-n</span> nginx
+deployment.apps/nginx created
+service/nginx created
+
+root@master:~# kubectl get pods <span class="nt">-n</span> nginx
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-7c5ddbdf54-hrs4t   1/1     Running   0          50s
+
+root@master:~# kubectl get service <span class="nt">-n</span> nginx
+NAME    TYPE       CLUSTER-IP       EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>        AGE
+nginx   NodePort   10.102.253.207   &lt;none&gt;        80:30000/TCP   84s
+
+<span class="c">#Pra validar precisamos pegar o ip do No e executar utilizando o parta mencionada</span>
+root@master:~# curl 192.168.0.20:30000
+&lt;<span class="o">!</span>DOCTYPE html&gt;
+&lt;html&gt;
+&lt;<span class="nb">head</span><span class="o">&gt;</span>
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+&lt;style&gt;
+html <span class="o">{</span> color-scheme: light dark<span class="p">;</span> <span class="o">}</span>
+body <span class="o">{</span> width: 35em<span class="p">;</span> margin: 0 auto<span class="p">;</span>
+font-family: Tahoma, Verdana, Arial, sans-serif<span class="p">;</span> <span class="o">}</span>
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+&lt;p&gt;If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p&gt;
+
+&lt;p&gt;For online documentation and support please refer to
+&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"http://nginx.org/"</span><span class="o">&gt;</span>nginx.org&lt;/a&gt;.&lt;br/&gt;
+Commercial support is available at
+&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"http://nginx.com/"</span><span class="o">&gt;</span>nginx.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Thank you <span class="k">for </span>using nginx.&lt;/em&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+</code></pre></div></div>
+
+<h1>!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+<h1 id="-fim-">!!!!!!!!!! FIM !!!!!!!!!!!</h1>
+<h1 id="-1">!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Kubernets" /><category term="Vagrant" /><category term="Shell" /><summary type="html"><![CDATA[Nesse post vamos provisionar cluster Kubernets utilizando Vagrant KubeAdmin e ShellScript]]></summary></entry><entry><title type="html">Exemplo de utilizar alexa e executar comando de voz para ser executado no linux</title><link href="https://santana2196.github.io/posts/configurando-alexa-triggercmd/" rel="alternate" type="text/html" title="Exemplo de utilizar alexa e executar comando de voz para ser executado no linux" /><published>2024-01-08T00:00:00-03:00</published><updated>2024-01-08T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/configurando-alexa-triggercmd</id><content type="html" xml:base="https://santana2196.github.io/posts/configurando-alexa-triggercmd/"><![CDATA[<h6 id="recentemente-adquirir-uma-alexa-da-5-geracao-assim-podendo-fazer-alguma-coisa-com-meu-raspberry-que-estava-parado-a-um-tempo">Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo.</h6>
+<h6 id="vamos-esta-configurando-configurando-a-alexa-e-o-triggercmd-para-conseguimos-executar-comando-de-voz-ao-raspberry">Vamos esta configurando configurando a Alexa e o TriggerCmd para conseguimos executar comando de voz ao raspberry.</h6>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/cat-da.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="cria-uma-conta-triggercmd">Cria uma conta, TriggerCmd:</h6>
+<p>https://www.triggercmd.com/user/auth/login</p>
+
+<h6 id="onde-localizar-o-token">Onde localizar o token:</h6>
+
+<p>https://www.triggercmd.com/user/computer/create</p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa8.png" alt="Image8" /></p>
+
+<h4 id="vamos-comeca-a-configurar-onde-sera-executado-o-triggercmd">Vamos comeca a configurar onde sera executado o triggerCmd</h4>
+
+<h6 id="segue-linhas-para-instalar-executar-como-root-porque-precisa-de-permissoes">Segue linhas para instalar, executar como root porque precisa de permissoes:</h6>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>su -
+apt-get <span class="nt">-y</span> update
+apt-get <span class="nt">-y</span> upgrade
+apt <span class="nt">-y</span> <span class="nb">install </span>npm nodejs
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://agents.triggercmd.com/triggercmdagent_1.0.1_all.deb
+dpkg <span class="nt">-i</span> triggercmdagent_1.0.1_all.deb
+</code></pre></div></div>
+
+<h6 id="executar-o-comando-para-configurar-o-token">Executar o comando para configurar o token:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">triggercmdagent</span>
+</code></pre></div></div>
+<blockquote>
+  <p>( colar o token, e pressionar o ENTER e aguardar)
+( ao finalizar, precione CTRL-C para sair. )</p>
+</blockquote>
+
+<h6 id="instalar-e-configurar-o-daemon-dos-servicos">instalar e configurar o Daemon dos servicos:</h6>
+<p>bash /usr/share/triggercmdagent/app/src/installdaemon.sh</p>
+
+<h6 id="lista-de-comando-para-executar-como-servico">Lista de comando para executar como servico:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl stop triggercmdagent
+systemctl start triggercmdagent
+systemctl status triggercmdagent
+</code></pre></div></div>
+<h6 id="arquivo-onde-e-amarzenado-os-comandos-e-ja-com-uns-exemplos">Arquivo onde e amarzenado os comandos, e ja com uns exemplos:</h6>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/root/.TRIGGERcmdData/commands.json
+
+root@raspberrypi:~# <span class="nb">cat</span> /root/.TRIGGERcmdData/commands.json
+<span class="o">[</span>
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"Reboot"</span>,<span class="s2">"command"</span>:<span class="s2">"shutdown -r"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"reboot"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"yum update"</span>,<span class="s2">"command"</span>:<span class="s2">"yum -y update"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"yum update"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"apt update"</span>,<span class="s2">"command"</span>:<span class="s2">"apt-get -y update"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"update"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>,
+  <span class="o">{</span><span class="s2">"trigger"</span>:<span class="s2">"desligar"</span>,<span class="s2">"command"</span>:<span class="s2">"shutdown now"</span>,<span class="s2">"ground"</span>:<span class="s2">"background"</span>,<span class="s2">"voice"</span>:<span class="s2">"desligar pi"</span>,<span class="s2">"allowParams"</span>: <span class="s2">"false"</span><span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div></div>
+
+<h6 id="agora-vamos-configura-no-app-da-alexa">Agora vamos configura no app da alexa:</h6>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa1.png" alt="Dummy Image 1" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa2.png" alt="Dummy Image 2" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa3.png" alt="Dummy Image 3" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa4.png" alt="Dummy Image 4" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa5.png" alt="Dummy Image 5" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa6.png" alt="Dummy Image 6" /></p>
+
+<p><img src="/assets/icons/alexa-triggercmd-smarthome/alexa7.png" alt="Dummy Image 7" /></p>
+
+<p>Para executar basta dizer: <strong>Alexa, desligar pi</strong>.</p>
+
+<h4 id="obs">Obs.</h4>
+
+<blockquote>
+  <p>para adicionar comandos, precisa seguir exemplo acima e sempre da um restart no servico que a alexa ja auto reconhece comando novo</p>
+</blockquote>
+
+<h6 id="para-remover">Para remover:</h6>
+<p><code class="language-plaintext highlighter-rouge">desabilitar a skill que foi habilitada</code></p>
+
+<h6 id="remover-os-servicos">Remover os servicos</h6>
+<p><code class="language-plaintext highlighter-rouge">systemctl stop triggercmdagent</code>
+<code class="language-plaintext highlighter-rouge">bash /usr/share/triggercmdagent/app/src/removedaemon.sh</code>
+<code class="language-plaintext highlighter-rouge">apt remove triggercmdagent</code></p>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Alexa" /><category term="TriggerCMD" /><summary type="html"><![CDATA[Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo. Vamos esta configurando configurando a Alexa e o TriggerCmd para conseguimos executar comando de voz ao raspberry.]]></summary></entry><entry><title type="html">Exemplo de crud utilizando o python, flask e firestore</title><link href="https://santana2196.github.io/posts/crud-utilizando-python-flask-firestore/" rel="alternate" type="text/html" title="Exemplo de crud utilizando o python, flask e firestore" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/crud-utilizando-python-flask-firestore</id><content type="html" xml:base="https://santana2196.github.io/posts/crud-utilizando-python-flask-firestore/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+
+<p><img src="/assets/icons/imgs/work2.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="clone-do-repositorio">Clone do repositorio:</h6>
+<p><code class="language-plaintext highlighter-rouge">git clone https://github.com/santana2196/flask_firestore_api.git</code></p>
+
+<h6 id="criar-o-ambiente-virtual">Criar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 -m venv venv</code></p>
+
+<h6 id="acessar-o-ambiente-virtual">Acessar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">source venv/bin/activate</code></p>
+
+<h6 id="instalar-dependências">Instalar dependências:</h6>
+<p><code class="language-plaintext highlighter-rouge">pip install -r req.txt</code></p>
+
+<h6 id="arquivo-de-configuracao">Arquivo de configuracao:</h6>
+<p><code class="language-plaintext highlighter-rouge">app/__init__.py</code></p>
+
+<h6 id="baixa-e-adicionar-o-arquivo-com-as-credencial-do-google-linha">Baixa e adicionar o arquivo com as credencial do google, linha:</h6>
+<p><code class="language-plaintext highlighter-rouge">cred = credentials.Certificate('./firebase-admin.json')</code></p>
+
+<h6 id="executar-projeto-na-porta-8080">Executar projeto na porta 8080:</h6>
+<p><code class="language-plaintext highlighter-rouge">python run.py</code></p>
+
+<h5 id="segue-payloads-as-collection-a-ser-criada-ja-definida-no-appinitpy-chamada-users">Segue payloads, as collection a ser criada ja definida no app/<strong>init</strong>.py chamada users</h5>
+
+<h6 id="adicionar">Adicionar:</h6>
+<blockquote>
+  <p>curl –location –request POST ‘localhost:8080/add’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “nome”: “fabricio”, “idade”: 35, “cidade”: “BA”, “linguagens”: [“Java script”,”Java”] }’</p>
+</blockquote>
+
+<h6 id="listar">Listar:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list’</p>
+</blockquote>
+
+<h6 id="listar-passando-argumento">Listar passando argumento:</h6>
+<blockquote>
+  <p>curl –location –request GET ‘localhost:8080/list?nome=fabricio’ –data-raw ‘’</p>
+</blockquote>
+
+<h6 id="atualizar">Atualizar:</h6>
+<blockquote>
+  <p>curl –location –request PUT ‘localhost:8080/update’ \ –header ‘Content-Type: application/json’ \ –data-raw ‘{ “id”: “fD6BFOBmVsIbUjY7OUFq” , “nome”: “ronaldo”, “idade”: 32, “cidade”: “SP”, “linguagens”: [“python”] }’</p>
+</blockquote>
+
+<h6 id="delete-com-argumento-id">Delete com argumento id:</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=60LnTY0jSTmibWSc3b5S’ \ –data-raw ‘’</p>
+</blockquote>
+
+<h6 id="deletar-todo">Deletar todo</h6>
+<blockquote>
+  <p>curl –location –request DELETE ‘localhost:8080/delete?id=all’ \ –data-raw ‘’</p>
+</blockquote>
+
+<h5 id="pontos-a-melhorar">Pontos a melhorar</h5>
+<ol>
+  <li>msg de erro</li>
+  <li>filtro</li>
+  <li>output de logs</li>
+  <li>uso de OOP</li>
+  <li>adicionar wsgi</li>
+</ol>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="Flask" /><category term="Python" /><category term="Firestore" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry><entry><title type="html">Exemplo de publish e consumer utilizando rabbitmq e python</title><link href="https://santana2196.github.io/posts/exemplo-rabbitmq-publish-consumer/" rel="alternate" type="text/html" title="Exemplo de publish e consumer utilizando rabbitmq e python" /><published>2023-11-21T00:00:00-03:00</published><updated>2023-11-21T00:00:00-03:00</updated><id>https://santana2196.github.io/posts/exemplo-rabbitmq-publish-consumer</id><content type="html" xml:base="https://santana2196.github.io/posts/exemplo-rabbitmq-publish-consumer/"><![CDATA[<h4 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h4>
+
+<p><img src="/assets/icons/imgs/work1.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="clone-do-repositorio">Clone do repositorio:</h6>
+<blockquote>
+  <p>git clone https://github.com/santana2196/rabbitmq_publish_consumer.git</p>
+</blockquote>
+
+<h6 id="criar-o-ambiente-virtual">Criar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 -m venv venv</code></p>
+
+<h6 id="acessar-o-ambiente-virtual">Acessar o ambiente virtual:</h6>
+<p><code class="language-plaintext highlighter-rouge">source venv/bin/activate</code></p>
+
+<h6 id="instalar-dependências">Instalar dependências:</h6>
+<p><code class="language-plaintext highlighter-rouge">pip3 install pika</code></p>
+
+<h6 id="docker-compose">docker-compose:</h6>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: '3.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+        - app
+    volumes:
+        - ./rabbitmq/data/:/var/lib/rabbitmq/
+        - ./rabbitmq/log/:/var/log/rabbitmq/
+
+networks:
+  app:
+    driver: bridge
+</code></pre></div></div>
+
+<h6 id="subir-o-ambiente-utilizando-docker-compose">subir o ambiente utilizando docker-compose:</h6>
+<p><code class="language-plaintext highlighter-rouge">docker-compose up -d</code></p>
+
+<h6 id="acessar-rabbitmq">Acessar rabbitmq:</h6>
+<p><code class="language-plaintext highlighter-rouge">localhost:15672</code></p>
+
+<h5 id="login">Login:</h5>
+<p><code class="language-plaintext highlighter-rouge">login: guest</code>
+<code class="language-plaintext highlighter-rouge">pass: guest</code></p>
+
+<h6 id="exemplo-de-publicação">Exemplo de publicação:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 publish_rabbitmq.py</code></p>
+
+<h6 id="exemplo-de-consumer">Exemplo de consumer:</h6>
+<p><code class="language-plaintext highlighter-rouge">python3 consumer-rabbitmq.py</code></p>
+
+<h6 id="validando-a-insersao-no-banco-sqlite3">Validando a insersao no banco sqlite3:</h6>
+<p><code class="language-plaintext highlighter-rouge">sqlite3 operation/banco/db.sqlite3</code>
+<code class="language-plaintext highlighter-rouge">sqlite&gt; select count(*) from population;</code></p>]]></content><author><name>Santana2196</name><email>santana2196@outlook.com</email></author><category term="rabbitmq" /><category term="Python" /><category term="docker" /><summary type="html"><![CDATA[Mãos a Obra]]></summary></entry></feed>

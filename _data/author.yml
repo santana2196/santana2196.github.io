@@ -1,0 +1,21 @@
+name: Santana2196
+dp: "/assets/icons/page.png"
+description: "
+  <p>
+    Apenas contribuindo conhecimento que adquiri em projetos que participei que podem ajuda assim como me ajudou. 
+  </p>
+  <br/>
+  <p>
+    Vou tentar manter atualizado: 
+    <br>
+   <a href='https://github.com/santana2196' target='_blank'></a>
+  </P>
+"
+# email: email@email
+contact:
+  # - title: linkedin
+  #   url: https://www.linkedin.com/in/
+  - title: github
+    url: https://github.com/santana2196
+  # - title: email
+  #   url: email@email.com

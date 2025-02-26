@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW3KCNDSYS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-PW3KCNDSYS');
+  </script>
+    <link rel="shortcut icon" type="image/png" href="/assets/icons/a.png">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-6455673049503523">
+  <title>Santana2196 | Como expor app do kubernets utilizando ip local com "Metallb"</title>
+  
+  <link rel="stylesheet" href="/assets/css/post.css" />
+  <link rel="stylesheet" href="/assets/css/syntax.css" />
+  
+  <link rel="stylesheet" href="/assets/css/common.css" />
+  <script src="/assets/js/categories.js"></script>
+  <script>
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme) {
+      document.documentElement.setAttribute(
+        "data-theme",
+        localStorage.getItem("theme")
+      );
+    }
+  </script>
+  
+  <script defer src="/assets/js/lbox.js"></script>
+  
+</head>
+
+  <body>
+    <main>
+      <header>
+  <a class="site-title" href="/">Santana2196</a>
+  <!-- dark/light mode -->
+  <span id="dark-mode-toggle" style="cursor: pointer">
+  <svg
+  stroke="currentColor"
+  fill="currentColor"
+  stroke-width="0"
+  viewBox="0 0 10 30"
+  height="100px"
+  width="100px"
+  
+  xmlns="http://www.w3.org/2000/svg"
+  >
+  <path fill="#444" d="M8 0c-2.761 0-5 2.239-5 5 0.013 1.672 0.878 3.138 2.182 3.989l0.818 2.011c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5h0.41c0.342 0.55 0.915 0.929 1.581 0.999 0.684-0.071 1.258-0.449 1.594-0.99l0.415-0.009c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5l0.8-2c1.322-0.862 2.187-2.328 2.2-3.998 0-2.763-2.239-5.002-5-5.002zM10.25 8.21l-0.25 0.17-0.11 0.29-0.89 2.14c-0.042 0.111-0.147 0.189-0.27 0.19h-1.51c-0.103-0.020-0.186-0.093-0.219-0.188l-0.871-2.142-0.13-0.29-0.25-0.18c-1.045-0.7-1.729-1.868-1.75-3.197-0-2.212 1.791-4.003 4-4.003s4 1.791 4 4c-0.017 1.336-0.702 2.509-1.736 3.201z"></path>
+  <path fill="#444" d="M10.29 3c-0.574-0.612-1.387-0.995-2.289-1l-0.001 1c0.585 0.002 1.115 0.238 1.5 0.62 0.278 0.386 0.459 0.858 0.499 1.37l1.001 0.009c-0.045-0.756-0.305-1.443-0.718-2.011z"></path>
+  </svg>
+
+  </span>
+</header>
+
+      <section class="article">
+        <div class="article-header">
+          <h2 class="article-title">Como expor app do kubernets utilizando ip local com "Metallb"</h2>
+          <small class="date">17 Apr 2024</small>
+          <div class="categories">
+            
+            <a href="#!" class="category">Kubernets</a>
+            
+          </div>
+        </div>
+        <div class="content"><h5 id="nesse-post-vamos-expor-app-utilizando-ip-local-utilizando-metallb-no-kubernets">Nesse post vamos expor app utilizando ip local utilizando <code class="language-plaintext highlighter-rouge">Metallb</code> no Kubernets</h5>
+
+<h6 id="segue-pre-requisitos">Segue pre-requisitos:</h6>
+<ul>
+  <li>lab ja esta criado -&gt; <a href="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/">Lab Kubernets</a>.</li>
+</ul>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/cat.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="vamos-partir-do-principio-que-o-lab-ja-esta-funcionando-e-que-ja-esteja-rodando-o-nginx">Vamos partir do principio que o lab ja esta funcionando e que ja esteja rodando o nginx:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">n</span> <span class="nx">nginx</span>
+<span class="nx">NAME</span>                     <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">nginx</span><span class="o">-</span><span class="mi">7</span><span class="nx">c5ddbdf54</span><span class="o">-</span><span class="mi">2</span><span class="nx">wdjn</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">6</span><span class="nx">s</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span> <span class="o">-</span><span class="nx">n</span> <span class="nx">nginx</span>
+<span class="nx">NAME</span>    <span class="nx">TYPE</span>       <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>   <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">nginx</span>   <span class="nx">NodePort</span>   <span class="mf">10.102</span><span class="p">.</span><span class="mf">253.207</span>   <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="p">:</span><span class="mi">30000</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">4</span><span class="nx">d11h</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.20</span><span class="p">:</span><span class="mi">30000</span>
+<span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">nginx</span><span class="o">!&lt;</span><span class="sr">/title</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">style</span><span class="o">&gt;</span>
+<span class="nx">html</span> <span class="p">{</span> <span class="nx">color</span><span class="o">-</span><span class="nx">scheme</span><span class="p">:</span> <span class="nx">light</span> <span class="nx">dark</span><span class="p">;</span> <span class="p">}</span>
+<span class="nx">body</span> <span class="p">{</span> <span class="nl">width</span><span class="p">:</span> <span class="mi">35</span><span class="nx">em</span><span class="p">;</span> <span class="nl">margin</span><span class="p">:</span> <span class="mi">0</span> <span class="nx">auto</span><span class="p">;</span>
+<span class="nx">font</span><span class="o">-</span><span class="nx">family</span><span class="p">:</span> <span class="nx">Tahoma</span><span class="p">,</span> <span class="nx">Verdana</span><span class="p">,</span> <span class="nx">Arial</span><span class="p">,</span> <span class="nx">sans</span><span class="o">-</span><span class="nx">serif</span><span class="p">;</span> <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/style</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/head</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">nginx</span><span class="o">!&lt;</span><span class="sr">/h1</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">If</span> <span class="nx">you</span> <span class="nx">see</span> <span class="k">this</span> <span class="nx">page</span><span class="p">,</span> <span class="nx">the</span> <span class="nx">nginx</span> <span class="nx">web</span> <span class="nx">server</span> <span class="nx">is</span> <span class="nx">successfully</span> <span class="nx">installed</span> <span class="nx">and</span>
+<span class="nx">working</span><span class="p">.</span> <span class="nx">Further</span> <span class="nx">configuration</span> <span class="nx">is</span> <span class="nx">required</span><span class="p">.</span><span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">For</span> <span class="nx">online</span> <span class="nx">documentation</span> <span class="nx">and</span> <span class="nx">support</span> <span class="nx">please</span> <span class="nx">refer</span> <span class="nx">to</span>
+<span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://nginx.org/</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">org</span><span class="o">&lt;</span><span class="sr">/a&gt;.&lt;br/</span><span class="o">&gt;</span>
+<span class="nx">Commercial</span> <span class="nx">support</span> <span class="nx">is</span> <span class="nx">available</span> <span class="nx">at</span>
+<span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://nginx.com/</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">com</span><span class="o">&lt;</span><span class="sr">/a&gt;.&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="nx">em</span><span class="o">&gt;</span><span class="nx">Thank</span> <span class="nx">you</span> <span class="k">for</span> <span class="nx">using</span> <span class="nx">nginx</span><span class="p">.</span><span class="o">&lt;</span><span class="sr">/em&gt;&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/html</span><span class="err">&gt;
+</span></code></pre></div></div>
+<h6 id="vamos-criar-um-deployment-a-partir-de-uma-imagem-do-dockerhub">Vamos criar um deployment a partir de uma imagem do dockerhub:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">deploy</span>
+<span class="nx">No</span> <span class="nx">resources</span> <span class="nx">found</span> <span class="k">in</span> <span class="k">default</span> <span class="nx">namespace</span><span class="p">.</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span>  <span class="nx">create</span> <span class="nx">deployment</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">image</span><span class="o">=</span><span class="nx">santana2196</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">google</span><span class="o">-</span><span class="nx">sample</span><span class="p">:</span><span class="mf">1.0</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">created</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">51</span><span class="nx">s</span>
+</code></pre></div></div>
+<h6 id="agora-vamos-expor-o-app">Agora vamos expor o app:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">deployment</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">type</span> <span class="nx">LoadBalancer</span> <span class="o">--</span><span class="nx">port</span> <span class="mi">80</span> <span class="o">--</span><span class="nx">target</span><span class="o">-</span><span class="nx">port</span> <span class="mi">8080</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">exposed</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span>
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>   <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>        <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>        <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="o">&lt;</span><span class="nx">pending</span><span class="o">&gt;</span>     <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">20</span><span class="nx">s</span>
+
+</code></pre></div></div>
+
+<h6 id="validando-esta-como-pendente-o-external-ip-agora-vamos-configurar-o-metallib">Validando esta como pendente o “External-Ip”, agora vamos configurar o “MetalLib”:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml</span>
+<span class="nx">namespace</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">addresspools</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bfdprofiles</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgpadvertisements</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">bgppeers</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">communities</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">ipaddresspools</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">customresourcedefinition</span><span class="p">.</span><span class="nx">apiextensions</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">l2advertisements</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">serviceaccount</span><span class="o">/</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">role</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">role</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">pod</span><span class="o">-</span><span class="nx">lister</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">clusterrole</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">rolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">rolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">pod</span><span class="o">-</span><span class="nx">lister</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">clusterrolebinding</span><span class="p">.</span><span class="nx">rbac</span><span class="p">.</span><span class="nx">authorization</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span><span class="p">:</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">secret</span><span class="o">/</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">server</span><span class="o">-</span><span class="nx">cert</span> <span class="nx">created</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">service</span> <span class="nx">created</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">controller</span> <span class="nx">created</span>
+<span class="nx">daemonset</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">speaker</span> <span class="nx">created</span>
+<span class="nx">validatingwebhookconfiguration</span><span class="p">.</span><span class="nx">admissionregistration</span><span class="p">.</span><span class="nx">k8s</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">metallb</span><span class="o">-</span><span class="nx">webhook</span><span class="o">-</span><span class="nx">configuration</span> <span class="nx">created</span>
+
+</code></pre></div></div>
+<h6 id="no-arquivo-ipaddresspoolyaml-informamos-um-range-de-ip">No arquivo “ipaddresspool.yaml” informamos um range de ip:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">v1beta1</span>
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">IPAddressPool</span>
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="k">default</span><span class="o">-</span><span class="nx">pool</span>
+  <span class="nx">namespace</span><span class="p">:</span> <span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">addresses</span><span class="p">:</span>
+  <span class="o">-</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span><span class="o">-</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.110</span>
+
+</code></pre></div></div>
+<h6 id="vamos-aplicar-outro-resorce">Vamos aplicar outro resorce:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">v1beta1</span>
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">L2Advertisement</span>
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="k">default</span>
+  <span class="nx">namespace</span><span class="p">:</span> <span class="nx">metallb</span><span class="o">-</span><span class="nx">system</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">ipAddressPools</span><span class="p">:</span>
+  <span class="o">-</span> <span class="k">default</span><span class="o">-</span><span class="nx">pool</span>
+
+</code></pre></div></div>
+
+<h6 id="vamos-agora-aplicar-os-dois-resources">Vamos agora aplicar os dois resources:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">ls</span> <span class="o">-</span><span class="nx">lh</span>
+<span class="nx">total</span> <span class="mi">16</span><span class="nx">K</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">452</span> <span class="nx">Apr</span> <span class="mi">13</span> <span class="mi">09</span><span class="p">:</span><span class="mi">48</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">161</span> <span class="nx">Apr</span> <span class="mi">17</span> <span class="mi">21</span><span class="p">:</span><span class="mi">47</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="o">-</span><span class="nx">rw</span><span class="o">-</span><span class="nx">r</span><span class="o">--</span><span class="nx">r</span><span class="o">--</span> <span class="mi">1</span> <span class="nx">root</span> <span class="nx">root</span>  <span class="mi">148</span> <span class="nx">Apr</span> <span class="mi">17</span> <span class="mi">21</span><span class="p">:</span><span class="mi">47</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="nx">ipaddresspool</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="k">default</span><span class="o">-</span><span class="nx">pool</span> <span class="nx">created</span>
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="nx">l2advertisement</span><span class="p">.</span><span class="nx">metallb</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="k">default</span> <span class="nx">created</span>
+</code></pre></div></div>
+
+<h6 id="vamos-validar">Vamos validar:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">service</span>
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>     <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>        <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>        <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">9</span><span class="nx">m5s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>
+
+</code></pre></div></div>
+
+<h6 id="vamos-escalar-os-pods-e-realizar-os-teste">Vamos escalar os pods, e realizar os teste:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">scale</span>   <span class="nx">deployment</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="o">--</span><span class="nx">replicas</span><span class="o">=</span><span class="mi">4</span>
+<span class="nx">deployment</span><span class="p">.</span><span class="nx">apps</span><span class="o">/</span><span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span> <span class="nx">scaled</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>              <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">ContainerCreating</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>             <span class="mi">0</span>          <span class="mi">16</span><span class="nx">m</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> 
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>
+</code></pre></div></div>
+
+<h6 id="vamos-provisionar-um-pod-mysql">Vamos provisionar um pod mysql:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">cat</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">mysql</span><span class="p">.</span><span class="nx">yaml</span>
+
+<span class="nx">apiVersion</span><span class="p">:</span> <span class="nx">v1</span>                  
+<span class="nx">kind</span><span class="p">:</span> <span class="nx">Pod</span>                       
+<span class="nx">metadata</span><span class="p">:</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>
+  <span class="nx">labels</span><span class="p">:</span>
+    <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>
+<span class="nx">spec</span><span class="p">:</span>
+  <span class="nx">containers</span><span class="p">:</span>
+    <span class="o">-</span> <span class="nx">resources</span><span class="p">:</span>
+        <span class="nx">limits</span><span class="p">:</span>
+            <span class="nx">cpu</span><span class="p">:</span> <span class="mf">0.5</span>
+      <span class="nx">image</span><span class="p">:</span> <span class="nx">centos</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="mi">57</span><span class="o">-</span><span class="nx">centos7</span><span class="p">:</span><span class="mf">5.7</span>
+      <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span>
+      <span class="nx">env</span><span class="p">:</span>
+        <span class="o">-</span> <span class="nx">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">MYSQL_ROOT_PASSWORD</span><span class="dl">"</span>
+          <span class="nx">value</span><span class="p">:</span> <span class="dl">"</span><span class="s2">senha</span><span class="dl">"</span>         
+      <span class="nx">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="nx">containerPort</span><span class="p">:</span> <span class="mi">3306</span>
+          <span class="nx">name</span><span class="p">:</span> <span class="nx">mysql</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">apply</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">deploy</span><span class="o">-</span><span class="nx">mysql</span><span class="p">.</span><span class="nx">yaml</span> 
+<span class="nx">pod</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="nx">created</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">27</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">m37s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">19</span><span class="nx">m</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">pod</span> <span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="o">--</span><span class="nx">type</span> <span class="nx">LoadBalancer</span> <span class="o">--</span><span class="nx">port</span> <span class="mi">3306</span> <span class="o">--</span><span class="nx">target</span><span class="o">-</span><span class="nx">port</span> <span class="mi">3306</span>
+<span class="nx">service</span><span class="o">/</span><span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span> <span class="nx">exposed</span>
+
+<span class="nx">NAME</span>               <span class="nx">TYPE</span>           <span class="nx">CLUSTER</span><span class="o">-</span><span class="nx">IP</span>       <span class="nx">EXTERNAL</span><span class="o">-</span><span class="nx">IP</span>     <span class="nc">PORT</span><span class="p">(</span><span class="nx">S</span><span class="p">)</span>          <span class="nx">AGE</span>
+<span class="nx">kubernetes</span>         <span class="nx">ClusterIP</span>      <span class="mf">10.96</span><span class="p">.</span><span class="mf">0.1</span>        <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">443</span><span class="o">/</span><span class="nx">TCP</span>          <span class="mi">4</span><span class="nx">d21h</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>    <span class="nx">LoadBalancer</span>   <span class="mf">10.106</span><span class="p">.</span><span class="mf">14.178</span>    <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span>   <span class="mi">3306</span><span class="p">:</span><span class="mi">30523</span><span class="o">/</span><span class="nx">TCP</span>   <span class="mi">26</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span>   <span class="nx">LoadBalancer</span>   <span class="mf">10.103</span><span class="p">.</span><span class="mf">148.143</span>   <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>   <span class="mi">80</span><span class="p">:</span><span class="mi">32354</span><span class="o">/</span><span class="nx">TCP</span>     <span class="mi">18</span><span class="nx">m</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">telnet</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span> <span class="mi">3306</span>
+<span class="nx">Trying</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span><span class="p">...</span>
+<span class="nx">Connected</span> <span class="nx">to</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span><span class="p">.</span>
+<span class="nx">Escape</span> <span class="nx">character</span> <span class="nx">is</span> <span class="dl">'</span><span class="s1">^]</span><span class="dl">'</span><span class="p">.</span>
+<span class="nx">J</span>
+<span class="mf">5.7</span><span class="p">.</span><span class="mi">24</span><span class="p">]</span><span class="mi">8</span><span class="nx">MNj7aDp</span><span class="p">.</span><span class="nx">MV</span><span class="p">}</span><span class="o">=</span><span class="mi">4</span><span class="nx">xmysql_native_password</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">mysql</span> <span class="o">--</span><span class="nx">password</span><span class="o">=</span><span class="nx">senha</span> <span class="o">--</span><span class="nx">user</span><span class="o">=</span><span class="nx">root</span> <span class="o">--</span><span class="nx">host</span><span class="o">=</span><span class="mf">192.168</span><span class="p">.</span><span class="mf">0.101</span>
+<span class="nx">mysql</span><span class="p">:</span> <span class="p">[</span><span class="nx">Warning</span><span class="p">]</span> <span class="nx">Using</span> <span class="nx">a</span> <span class="nx">password</span> <span class="nx">on</span> <span class="nx">the</span> <span class="nx">command</span> <span class="nx">line</span> <span class="kr">interface</span> <span class="nx">can</span> <span class="nx">be</span> <span class="nx">insecure</span><span class="p">.</span>
+<span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">MySQL</span> <span class="nx">monitor</span><span class="p">.</span>  <span class="nx">Commands</span> <span class="nx">end</span> <span class="kd">with</span> <span class="p">;</span> <span class="nx">or</span> <span class="err">\</span><span class="nx">g</span><span class="p">.</span>
+<span class="nx">Your</span> <span class="nx">MySQL</span> <span class="nx">connection</span> <span class="nx">id</span> <span class="nx">is</span> <span class="mi">3</span>
+<span class="nx">Server</span> <span class="nx">version</span><span class="p">:</span> <span class="mf">5.7</span><span class="p">.</span><span class="mi">24</span> <span class="nx">MySQL</span> <span class="nx">Community</span> <span class="nc">Server </span><span class="p">(</span><span class="nx">GPL</span><span class="p">)</span>
+
+<span class="nc">Copyright </span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">2024</span><span class="p">,</span> <span class="nx">Oracle</span> <span class="nx">and</span><span class="o">/</span><span class="nx">or</span> <span class="nx">its</span> <span class="nx">affiliates</span><span class="p">.</span>
+
+<span class="nx">Oracle</span> <span class="nx">is</span> <span class="nx">a</span> <span class="nx">registered</span> <span class="nx">trademark</span> <span class="k">of</span> <span class="nx">Oracle</span> <span class="nx">Corporation</span> <span class="nx">and</span><span class="o">/</span><span class="nx">or</span> <span class="nx">its</span>
+<span class="nx">affiliates</span><span class="p">.</span> <span class="nx">Other</span> <span class="nx">names</span> <span class="nx">may</span> <span class="nx">be</span> <span class="nx">trademarks</span> <span class="k">of</span> <span class="nx">their</span> <span class="nx">respective</span>
+<span class="nx">owners</span><span class="p">.</span>
+
+<span class="nx">Type</span> <span class="dl">'</span><span class="s1">help;</span><span class="dl">'</span> <span class="nx">or</span> <span class="dl">'</span><span class="se">\</span><span class="s1">h</span><span class="dl">'</span> <span class="k">for</span> <span class="nx">help</span><span class="p">.</span> <span class="nx">Type</span> <span class="dl">'</span><span class="se">\</span><span class="s1">c</span><span class="dl">'</span> <span class="nx">to</span> <span class="nx">clear</span> <span class="nx">the</span> <span class="nx">current</span> <span class="nx">input</span> <span class="nx">statement</span><span class="p">.</span>
+
+<span class="nx">mysql</span><span class="o">&gt;</span> 
+
+</code></pre></div></div>
+
+<h1>!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+<h1 id="-fim-">!!!!!!!!!! FIM !!!!!!!!!!!</h1>
+<h1 id="-1">!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+</div>
+      </section>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6455673049503523"
+     crossorigin="anonymous"></script>
+<!-- bloco -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6455673049503523"
+     data-ad-slot="9979445725"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<footer>
+  <p>&copy; 2022 - 2025 | Santana2196</p>
+  <!-- <script>
+
+        // requisicoes web 
+        fetch("https://servicodados.ibge.gov.br/api/v3/noticias/?busca=fii")
+        // .then - para sucesso
+        // .catch - para erro
+        .then(response => {
+            response.json().then(data => console.log(data));
+        })
+        .catch(error => console.log("error: ", error))
+
+  </script> -->
+</footer>
+<script src="/assets/js/mode.js" defer></script>
+
+    </main>
+    <section id="category-modal-bg"></section>
+<section id="category-modal">
+  <h1 id="category-modal-title"></h1>
+  <section id="category-modal-content"></section>
+</section>
+
+  </body>
+</html>

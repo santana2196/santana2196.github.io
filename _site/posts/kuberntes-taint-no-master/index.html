@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW3KCNDSYS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-PW3KCNDSYS');
+  </script>
+    <link rel="shortcut icon" type="image/png" href="/assets/icons/a.png">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-6455673049503523">
+  <title>Santana2196 | Como permitir que o Nó master deixe agendar os pods</title>
+  
+  <link rel="stylesheet" href="/assets/css/post.css" />
+  <link rel="stylesheet" href="/assets/css/syntax.css" />
+  
+  <link rel="stylesheet" href="/assets/css/common.css" />
+  <script src="/assets/js/categories.js"></script>
+  <script>
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme) {
+      document.documentElement.setAttribute(
+        "data-theme",
+        localStorage.getItem("theme")
+      );
+    }
+  </script>
+  
+  <script defer src="/assets/js/lbox.js"></script>
+  
+</head>
+
+  <body>
+    <main>
+      <header>
+  <a class="site-title" href="/">Santana2196</a>
+  <!-- dark/light mode -->
+  <span id="dark-mode-toggle" style="cursor: pointer">
+  <svg
+  stroke="currentColor"
+  fill="currentColor"
+  stroke-width="0"
+  viewBox="0 0 10 30"
+  height="100px"
+  width="100px"
+  
+  xmlns="http://www.w3.org/2000/svg"
+  >
+  <path fill="#444" d="M8 0c-2.761 0-5 2.239-5 5 0.013 1.672 0.878 3.138 2.182 3.989l0.818 2.011c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5h0.41c0.342 0.55 0.915 0.929 1.581 0.999 0.684-0.071 1.258-0.449 1.594-0.99l0.415-0.009c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5l0.8-2c1.322-0.862 2.187-2.328 2.2-3.998 0-2.763-2.239-5.002-5-5.002zM10.25 8.21l-0.25 0.17-0.11 0.29-0.89 2.14c-0.042 0.111-0.147 0.189-0.27 0.19h-1.51c-0.103-0.020-0.186-0.093-0.219-0.188l-0.871-2.142-0.13-0.29-0.25-0.18c-1.045-0.7-1.729-1.868-1.75-3.197-0-2.212 1.791-4.003 4-4.003s4 1.791 4 4c-0.017 1.336-0.702 2.509-1.736 3.201z"></path>
+  <path fill="#444" d="M10.29 3c-0.574-0.612-1.387-0.995-2.289-1l-0.001 1c0.585 0.002 1.115 0.238 1.5 0.62 0.278 0.386 0.459 0.858 0.499 1.37l1.001 0.009c-0.045-0.756-0.305-1.443-0.718-2.011z"></path>
+  </svg>
+
+  </span>
+</header>
+
+      <section class="article">
+        <div class="article-header">
+          <h2 class="article-title">Como permitir que o Nó master deixe agendar os pods</h2>
+          <small class="date">18 Apr 2024</small>
+          <div class="categories">
+            
+            <a href="#!" class="category">Kubernets</a>
+            
+          </div>
+        </div>
+        <div class="content"><h5 id="nesse-post-curto-vamos-permitir-que-o-no-master-agende-pod">Nesse post curto vamos permitir que o No master agende pod</h5>
+
+<h6 id="por-default-o-no-master-nao-agendar-pod-deixa-essa-responsabilidade-para-os-nos-escravos-com-isso-vamos-configurar-para-que-ele-deixe-agendar-no-nó-master-tambem">Por default o No master nao agendar pod, deixa essa responsabilidade para os nos escravos, com isso vamos configurar para que ele deixe agendar no Nó master tambem.</h6>
+
+<h3 id="mãos-a-obra"><code class="language-plaintext highlighter-rouge">Mãos a Obra</code></h3>
+
+<p><img src="/assets/icons/imgs/angry-cat.gif" alt="Dummy Image 8" /></p>
+
+<h6 id="vamos-seguir-nosso-lab-e-vamos-provisionar-apenas-o-master-no-lab-que-montamos">Vamos seguir nosso lab e vamos provisionar apenas o master no lab que montamos:</h6>
+<ul>
+  <li>lab ja esta criado -&gt; <a href="https://santana2196.github.io/posts/criando-cluster-com-kubeadmin/">Lab Kubernets</a>.</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">nodes</span>
+<span class="nx">NAME</span>     <span class="nx">STATUS</span>   <span class="nx">ROLES</span>           <span class="nx">AGE</span>    <span class="nx">VERSION</span>
+<span class="nx">master</span>   <span class="nx">Ready</span>    <span class="nx">control</span><span class="o">-</span><span class="nx">plane</span>   <span class="mi">5</span><span class="nx">d8h</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+<span class="nx">node1</span>    <span class="nx">Ready</span>    <span class="o">&lt;</span><span class="nx">none</span><span class="o">&gt;</span>          <span class="mi">5</span><span class="nx">d8h</span>   <span class="nx">v1</span><span class="p">.</span><span class="mf">29.3</span>
+</code></pre></div></div>
+<h6 id="vamos-parar-a-vm-de-no-vamos-perceber-que-as-aplicação-vao-parar-de-responder-porque-nao-tem-onde-agendar-fica-mais-nitido-quando-deleta-os-pods">Vamos parar a vm de No, vamos perceber que as aplicação vao parar de responder porque nao tem onde agendar, fica mais nitido quando deleta os pods:</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ vagrant halt node</span><span class="err">1
+</span><span class="o">==&gt;</span> <span class="nx">node1</span><span class="p">:</span> <span class="nx">Attempting</span> <span class="nx">graceful</span> <span class="nx">shutdown</span> <span class="k">of</span> <span class="nx">VM</span><span class="p">...</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="sr">/projeto-cluster-kubernets$ vagrant statu</span><span class="err">s
+</span><span class="nx">Current</span> <span class="nx">machine</span> <span class="nx">states</span><span class="p">:</span>
+
+<span class="nx">master</span>                    <span class="nf">running </span><span class="p">(</span><span class="nx">virtualbox</span><span class="p">)</span>
+<span class="nx">node1</span>                     <span class="nf">poweroff </span><span class="p">(</span><span class="nx">virtualbox</span><span class="p">)</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">mysql</span><span class="o">-</span><span class="nx">openshift</span>                     <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">10</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">cg475</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">ddnpp</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">dmb8s</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">gx844</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">11</span><span class="nx">h</span>
+
+<span class="nx">mint</span><span class="p">@</span><span class="nd">mint</span><span class="p">:</span><span class="o">~</span><span class="nx">$</span> <span class="nx">curl</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//192.168.0.100/</span>
+<span class="nx">curl</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="nx">Failed</span> <span class="nx">to</span> <span class="nx">connect</span> <span class="nx">to</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span> <span class="nx">port</span> <span class="mi">80</span> <span class="nx">after</span> <span class="mi">3055</span> <span class="nx">ms</span><span class="p">:</span> <span class="nx">No</span> <span class="nx">route</span> <span class="nx">to</span> <span class="nx">host</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="k">delete</span> <span class="nx">pods</span> <span class="o">--</span><span class="nx">all</span> <span class="o">--</span><span class="nx">force</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">mysql-openshift</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-8nq84</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-cg475</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-ddnpp</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-dmb8s</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-gx844</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-hbj5z</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-mtl5m</span><span class="dl">"</span> <span class="nx">deleted</span>
+<span class="nx">pod</span> <span class="dl">"</span><span class="s2">sample-nginx-app-6f6df4846b-r4xm6</span><span class="dl">"</span> <span class="nx">deleted</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">nwqrw</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">t4rv8</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">wcgjw</span>   <span class="mi">0</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Pending</span>   <span class="mi">0</span>          <span class="mi">3</span><span class="nx">s</span>
+
+</code></pre></div></div>
+<h6 id="vamos-utilizar-o-comando-taint-para-configurar-o-agendamento-de-pods-no-nó-master">Vamos utilizar o comando taint para configurar o agendamento de pods no nó master:</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="nx">taint</span> <span class="nx">nodes</span> <span class="nx">master</span> <span class="nx">node</span><span class="o">-</span><span class="nx">role</span><span class="p">.</span><span class="nx">kubernetes</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">control</span><span class="o">-</span><span class="nx">plane</span><span class="o">-</span>
+<span class="nx">node</span><span class="o">/</span><span class="nx">master</span> <span class="nx">untainted</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">kubectl</span> <span class="kd">get</span> <span class="nx">pods</span>
+<span class="nx">NAME</span>                                <span class="nx">READY</span>   <span class="nx">STATUS</span>    <span class="nx">RESTARTS</span>   <span class="nx">AGE</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">nwqrw</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">t4rv8</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+<span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">wcgjw</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="nx">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="nx">m58s</span>
+
+<span class="nx">root</span><span class="p">@</span><span class="nd">master</span><span class="p">:</span><span class="o">~</span><span class="err">#</span> <span class="nx">curl</span> <span class="mf">192.168</span><span class="p">.</span><span class="mf">0.100</span>
+<span class="nx">Hello</span><span class="p">,</span> <span class="nx">world</span><span class="o">!</span>
+<span class="nx">Version</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">.</span><span class="mi">0</span>
+<span class="nx">Hostname</span><span class="p">:</span> <span class="nx">sample</span><span class="o">-</span><span class="nx">nginx</span><span class="o">-</span><span class="nx">app</span><span class="o">-</span><span class="mi">6</span><span class="nx">f6df4846b</span><span class="o">-</span><span class="nx">vmwrf</span>
+
+</code></pre></div></div>
+<h1>!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+<h1 id="-fim-">!!!!!!!!!! FIM !!!!!!!!!!!</h1>
+<h1 id="-1">!!!!!!!!!!!!!!!!!!!!!!!!!!</h1>
+</div>
+      </section>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6455673049503523"
+     crossorigin="anonymous"></script>
+<!-- bloco -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6455673049503523"
+     data-ad-slot="9979445725"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<footer>
+  <p>&copy; 2022 - 2025 | Santana2196</p>
+  <!-- <script>
+
+        // requisicoes web 
+        fetch("https://servicodados.ibge.gov.br/api/v3/noticias/?busca=fii")
+        // .then - para sucesso
+        // .catch - para erro
+        .then(response => {
+            response.json().then(data => console.log(data));
+        })
+        .catch(error => console.log("error: ", error))
+
+  </script> -->
+</footer>
+<script src="/assets/js/mode.js" defer></script>
+
+    </main>
+    <section id="category-modal-bg"></section>
+<section id="category-modal">
+  <h1 id="category-modal-title"></h1>
+  <section id="category-modal-content"></section>
+</section>
+
+  </body>
+</html>

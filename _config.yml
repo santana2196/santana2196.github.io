@@ -1,0 +1,27 @@
+title: Santana2196
+markdown: kramdown
+
+# for atom feed
+author:
+  name: Santana2196
+  email: santana2196
+
+plugins:
+  - jemoji
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+collections_dir: all_collections
+collections:
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: "_posts"
+    values:
+      layout: "post"
+      permalink: /posts/:title/
+#exclude: ["sitemap.xml", "feed.xml", "LICENSE", "README.md"]
+exclude: ["LICENSE", "README.md"]
