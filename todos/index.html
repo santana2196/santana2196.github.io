@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR" id="top">
+  <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW3KCNDSYS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-PW3KCNDSYS');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-6455673049503523">
+
+  <link rel="shortcut icon" type="image/png" href="/assets/icons/a.png">
+  <title>Todos os artigos | Santana2196</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/assets/css/common.css" />
+  
+  <link rel="stylesheet" href="/assets/css/blog.css" />
+  
+
+  <!-- Immediate Theme Initializer -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+
+  <!-- JavaScript Modules -->
+  <script defer src="/assets/js/mode.js"></script>
+  <script defer src="/assets/js/categories.js"></script>
+  <script defer src="/assets/js/visitor-counter.js"></script>
+  
+  <script defer src="/assets/js/search.js"></script>
+  
+</head>
+
+  <body>
+    <div class="site-wrapper">
+      <header>
+  <div class="header-container">
+    <div class="header-left">
+      <a class="site-title" href="/">Santana2196</a>
+    </div>
+
+    <nav class="header-nav">
+      <a class="nav-btn " href="/">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Início</span>
+      </a>
+      <a class="nav-btn active" href="/todos/">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>Todos os artigos</span>
+      </a>
+    </nav>
+
+    <div class="header-right">
+      <button id="dark-mode-toggle" aria-label="Alternar modo claro e escuro">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+
+      <main class="blog-layout-container">
+        <!-- Sidebar -->
+        <aside class="blog-sidebar">
+          <section id="bio">
+  <div id="img-wrapper">
+    <img src="/assets/icons/page.png" alt="Santana2196" />
+  </div>
+  <div id="bio-wrapper">
+    <div id="text-wrapper">
+      
+        Desenvolvedor & Entusiasta Tech. Compartilhando aprendizados sobre Kubernetes, Cloud, Python, DevOps e autometria.
+      
+    </div>
+    <div id="social-wrapper">
+      
+      <a href="https://github.com/santana2196" target="_blank" rel="noopener noreferrer" class="social-link" title="Github">
+        
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+        
+      </a>
+      
+    </div>
+  </div>
+</section>
+
+
+          <!-- Search Input Card -->
+          <div class="sidebar-card search-card">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Buscar Artigos</span>
+            </div>
+            <div class="search-input-wrapper">
+              <input type="text" id="search-input" class="search-input" placeholder="Digite palavra-chave ou tag..." aria-label="Pesquisar artigos">
+            </div>
+          </div>
+
+          <!-- Tags Card -->
+          <div class="sidebar-card tags-card">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+              </svg>
+              <span>Categorias &amp; Tags</span>
+            </div>
+            <div class="tags-container" id="newinner">
+              
+                
+                <a href="#!" class="category-tag category">#Flask</a>
+              
+                
+                <a href="#!" class="category-tag category">#Python</a>
+              
+                
+                <a href="#!" class="category-tag category">#Firestore</a>
+              
+                
+                <a href="#!" class="category-tag category">#Rabbitmq</a>
+              
+                
+                <a href="#!" class="category-tag category">#Docker</a>
+              
+                
+                <a href="#!" class="category-tag category">#Alexa</a>
+              
+                
+                <a href="#!" class="category-tag category">#TriggerCMD</a>
+              
+                
+                <a href="#!" class="category-tag category">#Raspberry</a>
+              
+                
+                <a href="#!" class="category-tag category">#Kubernets</a>
+              
+                
+                <a href="#!" class="category-tag category">#Vagrant</a>
+              
+                
+                <a href="#!" class="category-tag category">#Shell</a>
+              
+                
+                <a href="#!" class="category-tag category">#Hacks_shell</a>
+              
+                
+                <a href="#!" class="category-tag category">#Linux</a>
+              
+                
+                <a href="#!" class="category-tag category">#Hardware</a>
+              
+            </div>
+          </div>
+
+          <!-- Status Card -->
+          <div class="sidebar-card status-card">
+            <div class="status-indicator">
+              <span class="status-dot"></span>
+              <span class="status-text">Blog Online &amp; Atualizado</span>
+            </div>
+            <div class="status-stats">
+              <div class="stat-item">
+                <span class="stat-value">8</span>
+                <span class="stat-label">Artigos</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="stat-total-visits">--</span>
+                <span class="stat-label">Visitas</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Feed Column - Timeline view grouped by year -->
+        <section class="blog-main-feed todos-feed" id="articles-list">
+
+          <!-- Page Header -->
+          <div class="todos-page-header">
+            <div class="todos-page-title-row">
+              <div class="todos-title-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+              </div>
+              <h1 class="todos-page-title">Arquivo Completo</h1>
+            </div>
+            <p class="todos-page-subtitle">Todos os <strong>8 artigos</strong> publicados, organizados por data</p>
+          </div>
+
+          <!-- Timeline grouped by year -->
+          
+          
+          <div class="timeline-year-group">
+            <div class="timeline-year-label">
+              <span class="year-badge">2026</span>
+              <span class="year-count">1 artigo</span>
+            </div>
+            <div class="timeline-items">
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="como ressuscitei um macbook air antigo (1.8 gb ram) otimizando o linux ao limite" data-categories="linux hardware shell">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        30 Aug
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        7 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/reviver-macbook-air-antigo-linux/" class="timeline-title-link">
+                      <h2 class="timeline-title">Como Ressuscitei um MacBook Air Antigo (1.8 GB RAM) Otimizando o Linux ao Limite</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Sabe aquele notebook antigo guardado na gaveta que muitos consideram lixo eletrônico? Eu decidi aceitar o desafio de ressuscitar um MacBook Air antigo (2011/2012) com...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Linux</span>
+                        
+                          <span class="category-tag category">#Hardware</span>
+                        
+                          <span class="category-tag category">#Shell</span>
+                        
+                      </div>
+                      <a href="/posts/reviver-macbook-air-antigo-linux/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+            </div>
+          </div>
+          
+          <div class="timeline-year-group">
+            <div class="timeline-year-label">
+              <span class="year-badge">2025</span>
+              <span class="year-count">1 artigo</span>
+            </div>
+            <div class="timeline-items">
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="alguns hacks shell" data-categories="hacks_shell shell">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        26 Feb
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        6 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/hacks-shell/" class="timeline-title-link">
+                      <h2 class="timeline-title">Alguns Hacks Shell</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Alguns Hacks shell pra ajudar na produtividade no dia dia. Mãos a Obra Um pouco sobre variaveis: #Declara variavel nome_da_variavel=valor #Printar variavel echo $nome_da_variavel #Para...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Hacks_shell</span>
+                        
+                          <span class="category-tag category">#Shell</span>
+                        
+                      </div>
+                      <a href="/posts/hacks-shell/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+            </div>
+          </div>
+          
+          <div class="timeline-year-group">
+            <div class="timeline-year-label">
+              <span class="year-badge">2024</span>
+              <span class="year-count">4 artigos</span>
+            </div>
+            <div class="timeline-items">
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="como permitir que o nó master deixe agendar os pods" data-categories="kubernets">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        18 Apr
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        4 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/kuberntes-taint-no-master/" class="timeline-title-link">
+                      <h2 class="timeline-title">Como permitir que o Nó master deixe agendar os pods</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Nesse post curto vamos permitir que o No master agende pod Por default o No master nao agendar pod, deixa essa responsabilidade para os nos...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Kubernets</span>
+                        
+                      </div>
+                      <a href="/posts/kuberntes-taint-no-master/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="como expor app do kubernets utilizando ip local com "metallb"" data-categories="kubernets">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        17 Apr
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        13 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/kubenets-ip-local-com-metallb/" class="timeline-title-link">
+                      <h2 class="timeline-title">Como expor app do kubernets utilizando ip local com "Metallb"</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Nesse post vamos expor app utilizando ip local utilizando Metallb no Kubernets Segue pre-requisitos: lab ja esta criado -&gt; Lab Kubernets. Mãos a Obra Vamos...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Kubernets</span>
+                        
+                      </div>
+                      <a href="/posts/kubenets-ip-local-com-metallb/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="exemplo de como provisionar cluster "kubernets" local com "kubeadmin"" data-categories="kubernets vagrant shell">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        12 Apr
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        31 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/criando-cluster-com-kubeadmin/" class="timeline-title-link">
+                      <h2 class="timeline-title">Exemplo de como provisionar cluster "Kubernets" local com "KubeAdmin"</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Nesse post vamos provisionar cluster Kubernets utilizando Vagrant KubeAdmin e ShellScript Segue pre-requisitos: Linux VirtualBox 192.168.0.30 - no master 192.168.0.20 - no escravo Mãos a...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Kubernets</span>
+                        
+                          <span class="category-tag category">#Vagrant</span>
+                        
+                          <span class="category-tag category">#Shell</span>
+                        
+                      </div>
+                      <a href="/posts/criando-cluster-com-kubeadmin/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="exemplo de utilizar alexa e executar comando de voz para ser executado no linux" data-categories="alexa triggercmd raspberry">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        08 Jan
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        2 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/configurando-alexa-triggercmd/" class="timeline-title-link">
+                      <h2 class="timeline-title">Exemplo de utilizar alexa e executar comando de voz para ser executado no linux</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Recentemente adquirir uma Alexa da 5 geracao, assim podendo fazer alguma coisa com meu raspberry que estava parado a um tempo. Vamos esta configurando configurando...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Alexa</span>
+                        
+                          <span class="category-tag category">#TriggerCMD</span>
+                        
+                          <span class="category-tag category">#Raspberry</span>
+                        
+                      </div>
+                      <a href="/posts/configurando-alexa-triggercmd/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+            </div>
+          </div>
+          
+          <div class="timeline-year-group">
+            <div class="timeline-year-label">
+              <span class="year-badge">2023</span>
+              <span class="year-count">2 artigos</span>
+            </div>
+            <div class="timeline-items">
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="exemplo de publish e consumer utilizando rabbitmq e python" data-categories="rabbitmq python docker">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        21 Nov
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        1 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/exemplo-rabbitmq-publish-consumer/" class="timeline-title-link">
+                      <h2 class="timeline-title">Exemplo de publish e consumer utilizando rabbitmq e python</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Mãos a Obra Clone do repositorio: git clone https://github.com/santana2196/rabbitmq_publish_consumer.git Criar o ambiente virtual: python3 -m venv venv Acessar o ambiente virtual: source venv/bin/activate Instalar dependências:...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Rabbitmq</span>
+                        
+                          <span class="category-tag category">#Python</span>
+                        
+                          <span class="category-tag category">#Docker</span>
+                        
+                      </div>
+                      <a href="/posts/exemplo-rabbitmq-publish-consumer/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+                
+                
+                
+
+                <article class="timeline-item" data-title="exemplo de crud utilizando o python, flask e firestore" data-categories="flask python firestore">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-meta">
+                      <time class="timeline-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        21 Nov
+                      </time>
+                      <span class="timeline-read-time">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        1 min
+                      </span>
+                    </div>
+
+                    <a href="/posts/crud-utilizando-python-flask-firestore/" class="timeline-title-link">
+                      <h2 class="timeline-title">Exemplo de crud utilizando o python, flask e firestore</h2>
+                    </a>
+
+                    <p class="timeline-snippet">Mãos a Obra Clone do repositorio: git clone https://github.com/santana2196/flask_firestore_api.git Criar o ambiente virtual: python3 -m venv venv Acessar o ambiente virtual: source venv/bin/activate Instalar dependências:...</p>
+
+                    <div class="timeline-footer">
+                      <div class="card-categories">
+                        
+                          <span class="category-tag category">#Flask</span>
+                        
+                          <span class="category-tag category">#Python</span>
+                        
+                          <span class="category-tag category">#Firestore</span>
+                        
+                      </div>
+                      <a href="/posts/crud-utilizando-python-flask-firestore/" class="timeline-read-btn">
+                        Ler artigo
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              
+            </div>
+          </div>
+          
+
+        </section>
+      </main>
+
+      <footer>
+  <div>
+    &copy; 2026 <strong>Santana2196</strong>.
+  </div>
+  <a href="#top" class="footer-back-to-top">
+    <span>Voltar ao topo</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+  </a>
+</footer>
+    </div>
+    <section id="category-modal-bg"></section>
+<section id="category-modal">
+  <h1 id="category-modal-title"></h1>
+  <section id="category-modal-content"></section>
+</section>
+
+  </body>
+</html>

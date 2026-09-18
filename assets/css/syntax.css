@@ -1,0 +1,54 @@
+/* Modern One Dark Syntax Highlighting Theme for Jekyll / Pygments / Rouge */
+
+.highlight .hll { background-color: #2c313a; }
+.highlight { color: #abb2bf; }
+
+/* Comments */
+.highlight .c, .highlight .cm, .highlight .c1, .highlight .cs {
+  color: #7f848e;
+  font-style: italic;
+}
+
+/* Keywords */
+.highlight .k, .highlight .kc, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr {
+  color: #c678dd;
+  font-weight: 600;
+}
+.highlight .kt { color: #e5c07b; }
+
+/* Operators & Punctuation */
+.highlight .o, .highlight .ow { color: #56b6c2; }
+.highlight .p { color: #abb2bf; }
+
+/* Strings */
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .se, .highlight .sh, .highlight .si, .highlight .sx, .highlight .sr, .highlight .s1, .highlight .ss {
+  color: #98c379;
+}
+
+/* Numbers */
+.highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .mo, .highlight .il {
+  color: #d19a66;
+}
+
+/* Functions & Names */
+.highlight .nf, .highlight .fm {
+  color: #61afef;
+  font-weight: 600;
+}
+
+.highlight .na { color: #d19a66; }
+.highlight .nc { color: #e5c07b; }
+.highlight .nd { color: #61afef; }
+.highlight .ne { color: #e06c75; }
+.highlight .nt { color: #e06c75; }
+.highlight .nv, .highlight .vc, .highlight .vg, .highlight .vi { color: #e06c75; }
+
+.highlight .nb, .highlight .bp { color: #56b6c2; }
+
+/* Generic */
+.highlight .gd { color: #e06c75; background-color: rgba(224, 108, 117, 0.15); }
+.highlight .gi { color: #98c379; background-color: rgba(152, 195, 121, 0.15); }
+.highlight .gh { color: #61afef; font-weight: bold; }
+.highlight .gu { color: #c678dd; font-weight: bold; }
+.highlight .ge { font-style: italic; }
+.highlight .gs { font-weight: bold; }
