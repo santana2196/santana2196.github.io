@@ -1,0 +1,44 @@
+name: Build and Deploy Encrypted Jekyll
+
+on:
+  push:
+    branches:
+      - main
+
+
+permissions:
+  contents: write      
+  pages: write         
+  id-token: write      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install git-crypt
+        run: sudo apt-get update && sudo apt-get install -y git-crypt
+
+      - name: Unlock git-crypt repository
+        run: |
+          printf "%s" "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > git-crypt-key.key
+          git-crypt unlock git-crypt-key.key
+          rm -f git-crypt-key.key
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Build Jekyll Site
+        run: |
+          bundle exec jekyll build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site

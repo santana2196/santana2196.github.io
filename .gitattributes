@@ -1,0 +1,8 @@
+# Criptografar TODO o repositório por padrão
+* filter=git-crypt diff=git-crypt -text
+
+# Manter apenas as regras do git, gitignore e automação do GitHub Actions desprotegidas
+.gitattributes !filter !diff
+.gitignore !filter !diff
+.github/** !filter !diff
+
